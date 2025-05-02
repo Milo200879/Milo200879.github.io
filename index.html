@@ -182,7 +182,9 @@
         <h3>${card.name}</h3>
         <p>${card.word}</p>
         <time>${card.time}</time>
-        <div>❤️ ${card.likes || 0}</div>
+        <div class='like-section'>
+      <button onclick="likeCard('${id}', ${card.likes || 0})">❤️</button> ${card.likes || 0}
+    </div>
         ${emailInfo}
         ${remove}
       `;
@@ -233,3 +235,12 @@
 </script>
 </body>
 </html>
+
+<script>
+  window.likeCard = function(id, currentLikes) {
+    import('https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js').then(({ getDatabase, ref, update }) => {
+      const db = getDatabase();
+      update(ref(db, 'cards/' + id), { likes: currentLikes + 1 });
+    });
+  };
+</script>
