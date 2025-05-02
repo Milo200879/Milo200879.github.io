@@ -11,17 +11,19 @@
       margin: 0;
       padding: 20px;
     }
-
     .container {
       max-width: 900px;
       margin: auto;
     }
-
+    .logo {
+      display: block;
+      max-width: 200px;
+      margin: 0 auto 20px auto;
+    }
     h1 {
       text-align: center;
       margin-bottom: 20px;
     }
-
     .admin-button {
       position: fixed;
       top: 20px;
@@ -34,7 +36,6 @@
       cursor: pointer;
       z-index: 1000;
     }
-
     .input-form {
       display: flex;
       flex-direction: column;
@@ -42,7 +43,6 @@
       margin-bottom: 30px;
       align-items: center;
     }
-
     input, select, button {
       padding: 12px;
       font-size: 16px;
@@ -51,7 +51,6 @@
       width: 100%;
       max-width: 400px;
     }
-
     button {
       background-color: #ff7f50;
       color: white;
@@ -59,17 +58,14 @@
       cursor: pointer;
       transition: background 0.3s;
     }
-
     button:hover {
       background-color: #e7633f;
     }
-
     .grid {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
       gap: 15px;
     }
-
     .card {
       border-radius: 10px;
       padding: 15px;
@@ -78,23 +74,19 @@
       position: relative;
       color: #000;
     }
-
     .card h3 {
       margin: 0 0 10px;
       font-size: 18px;
     }
-
     .card p {
       margin: 0;
     }
-
     .card time {
       font-size: 12px;
       color: #333;
       display: block;
       margin-top: 10px;
     }
-
     .remove-btn {
       position: absolute;
       top: 8px;
@@ -107,11 +99,9 @@
       height: 24px;
       cursor: pointer;
     }
-
     .remove-btn:hover {
       background: #c0392b;
     }
-
     .modal {
       display: none;
       position: fixed;
@@ -123,7 +113,6 @@
       overflow: auto;
       background-color: rgba(0,0,0,0.4);
     }
-
     .modal-content {
       background-color: #fff;
       margin: 15% auto;
@@ -133,7 +122,6 @@
       max-width: 400px;
       text-align: center;
     }
-
     .close {
       color: #aaa;
       float: right;
@@ -141,7 +129,6 @@
       font-weight: bold;
       cursor: pointer;
     }
-
     .close:hover {
       color: black;
     }
@@ -149,11 +136,8 @@
 </head>
 <body>
 
-
-<!-- Admin-knop -->
 <button class="admin-button" onclick="openModal()">🔐 Admin</button>
 
-<!-- Admin login popup -->
 <div id="loginModal" class="modal">
   <div class="modal-content">
     <span class="close" onclick="closeModal()">&times;</span>
@@ -164,6 +148,7 @@
 </div>
 
 <div class="container">
+  <img src="logo.png" alt="Logo Leerlingenraad" class="logo">
   <h1>Woordenmuur</h1>
 
   <div class="input-form">
@@ -183,7 +168,6 @@
   <div class="grid" id="cardGrid"></div>
 </div>
 
-<!-- Firebase SDK + appcode -->
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
   import { getDatabase, ref, push, onValue, remove } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
@@ -209,22 +193,13 @@
     const name = document.getElementById("name").value.trim();
     const word = document.getElementById("word").value.trim();
     const color = document.getElementById("color").value;
-
     if (!name || !word) {
       alert("Vul zowel je naam als een woord in!");
       return;
     }
-
     const now = new Date();
     const formattedTime = now.toLocaleDateString('nl-BE') + " " + now.toLocaleTimeString('nl-BE');
-
-    push(cardsRef, {
-      name,
-      word,
-      color,
-      time: formattedTime
-    });
-
+    push(cardsRef, { name, word, color, time: formattedTime });
     document.getElementById("name").value = "";
     document.getElementById("word").value = "";
     document.getElementById("color").selectedIndex = 0;
@@ -239,17 +214,10 @@
       const card = document.createElement("div");
       card.className = "card";
       card.style.backgroundColor = cardData.color;
-
       const removeButton = isAdmin
         ? `<button class="remove-btn" onclick="removeCard('${id}')">×</button>`
         : "";
-
-      card.innerHTML = `
-        ${removeButton}
-        <h3>${cardData.name}</h3>
-        <p>${cardData.word}</p>
-        <time>${cardData.time}</time>
-      `;
+      card.innerHTML = `${removeButton}<h3>${cardData.name}</h3><p>${cardData.word}</p><time>${cardData.time}</time>`;
       grid.appendChild(card);
     }
   });
@@ -275,12 +243,11 @@
       isAdmin = true;
       alert("Je bent nu ingelogd als admin.");
       closeModal();
-      onValue(cardsRef, () => {}); // opnieuw renderen
+      onValue(cardsRef, () => {});
     } else {
       alert("Verkeerd wachtwoord.");
     }
   };
 </script>
-
 </body>
 </html>
