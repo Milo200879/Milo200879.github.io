@@ -244,7 +244,9 @@ onValue(cardsRef, snapshot => {
     const color = document.getElementById("color").value;
     const now = new Date().toLocaleString();
     const user = auth.currentUser?.email || "onbekend";
-    push(cardsRef, { name, word, color, time: now, likes: 0, user, approved: false });
+    push(cardsRef, { name, word, color, time: now, likes: 0, user, approved: false }).then(() => {
+      alert("✅ Je woord is succesvol verzonden!\nNa goedkeuring door een moderator verschijnt het op de muur.\n(Omwille van taalbescherming keuren we eerst elk bericht goed.)");
+    });
   };
 
   window.removeCard = function (id) {
