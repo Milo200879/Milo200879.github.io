@@ -5,25 +5,46 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Woordenmuur met Firebase</title>
   <style>
+    :root {
+      --bg-color: #f7f5f0;
+      --text-color: #000;
+      --card-bg: #fff;
+      --button-bg: #ff7f50;
+      --button-hover: #e7633f;
+    }
+
+    body.dark-mode {
+      --bg-color: #121212;
+      --text-color: #ffffff;
+      --card-bg: #1e1e1e;
+      --button-bg: #bb86fc;
+      --button-hover: #985eff;
+    }
+
     body {
       font-family: 'Segoe UI', sans-serif;
-      background: #f7f5f0;
+      background: var(--bg-color);
+      color: var(--text-color);
       margin: 0;
       padding: 20px;
     }
+
     .container {
       max-width: 900px;
       margin: auto;
     }
+
     .logo {
       display: block;
       max-width: 200px;
       margin: 0 auto 20px auto;
     }
+
     h1 {
       text-align: center;
       margin-bottom: 20px;
     }
+
     .admin-button {
       position: fixed;
       top: 20px;
@@ -36,6 +57,20 @@
       cursor: pointer;
       z-index: 1000;
     }
+
+    .darkmode-button {
+      position: fixed;
+      top: 20px;
+      left: 20px;
+      background-color: var(--button-bg);
+      color: white;
+      border: none;
+      padding: 10px 16px;
+      border-radius: 6px;
+      cursor: pointer;
+      z-index: 1000;
+    }
+
     .input-form {
       display: flex;
       flex-direction: column;
@@ -43,6 +78,7 @@
       margin-bottom: 30px;
       align-items: center;
     }
+
     input, select, button {
       padding: 12px;
       font-size: 16px;
@@ -50,43 +86,54 @@
       border-radius: 6px;
       width: 100%;
       max-width: 400px;
+      background-color: var(--card-bg);
+      color: var(--text-color);
     }
+
     button {
-      background-color: #ff7f50;
+      background-color: var(--button-bg);
       color: white;
       border: none;
       cursor: pointer;
       transition: background 0.3s;
     }
+
     button:hover {
-      background-color: #e7633f;
+      background-color: var(--button-hover);
     }
+
     .grid {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
       gap: 15px;
     }
+
     .card {
       border-radius: 10px;
       padding: 15px;
+      background-color: var(--card-bg);
       box-shadow: 0 2px 8px rgba(0,0,0,0.1);
       word-wrap: break-word;
       position: relative;
-      color: #000;
+      color: var(--text-color);
     }
+
     .card h3 {
       margin: 0 0 10px;
       font-size: 18px;
     }
+
     .card p {
       margin: 0;
     }
+
     .card time {
       font-size: 12px;
-      color: #333;
+      color: var(--text-color);
       display: block;
       margin-top: 10px;
     }
+
     .remove-btn {
       position: absolute;
       top: 8px;
@@ -99,9 +146,11 @@
       height: 24px;
       cursor: pointer;
     }
+
     .remove-btn:hover {
       background: #c0392b;
     }
+
     .modal {
       display: none;
       position: fixed;
@@ -113,15 +162,18 @@
       overflow: auto;
       background-color: rgba(0,0,0,0.4);
     }
+
     .modal-content {
-      background-color: #fff;
+      background-color: var(--card-bg);
       margin: 15% auto;
       padding: 20px;
       border-radius: 8px;
       width: 90%;
       max-width: 400px;
       text-align: center;
+      color: var(--text-color);
     }
+
     .close {
       color: #aaa;
       float: right;
@@ -129,6 +181,7 @@
       font-weight: bold;
       cursor: pointer;
     }
+
     .close:hover {
       color: black;
     }
@@ -136,121 +189,11 @@
 </head>
 <body>
 
+<button class="darkmode-button" onclick="toggleDarkMode()">🌓</button>
 <button class="admin-button" onclick="openModal()">🔐 Admin</button>
 
-<div id="loginModal" class="modal">
-  <div class="modal-content">
-    <span class="close" onclick="closeModal()">&times;</span>
-    <h2>Beheerder login</h2>
-    <input type="password" id="adminPassword" placeholder="Wachtwoord voor beheer">
-    <button onclick="login()">Inloggen</button>
-  </div>
-</div>
-
-<div class="container">
-  <img src="logo.png" alt="Logo Leerlingenraad" class="logo">
-  <h1>Woordenmuur</h1>
-
-  <div class="input-form">
-    <input type="text" id="name" placeholder="Jouw naam">
-    <input type="text" id="word" placeholder="Woord of bericht">
-    <select id="color">
-      <option value="rgba(255, 0, 0, 0.7)">🔴 Rood</option>
-      <option value="rgba(0, 0, 255, 0.7)">🔵 Blauw</option>
-      <option value="rgba(0, 128, 0, 0.7)">🟢 Groen</option>
-      <option value="rgba(255, 255, 0, 0.7)">🟡 Geel</option>
-      <option value="rgba(255, 165, 0, 0.7)">🟠 Oranje</option>
-      <option value="rgba(128, 0, 128, 0.7)">🟣 Paars</option>
-    </select>
-    <button onclick="addCard()">Verstuur</button>
-  </div>
-
-  <div class="grid" id="cardGrid"></div>
-</div>
-
-<script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-  import { getDatabase, ref, push, onValue, remove } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
-
-  const firebaseConfig = {
-    apiKey: "AIzaSyBvJuRQMqjfc-Kwl2bCAxA5dejCh_ZFQQw",
-    authDomain: "padlet-bea3c.firebaseapp.com",
-    projectId: "padlet-bea3c",
-    storageBucket: "padlet-bea3c.firebasestorage.app",
-    messagingSenderId: "873457849726",
-    appId: "1:873457849726:web:158348903d437928d9cf2f",
-    measurementId: "G-GW8PNR0235",
-    databaseURL: "https://padlet-bea3c-default-rtdb.europe-west1.firebasedatabase.app/"
-  };
-
-  const app = initializeApp(firebaseConfig);
-  const db = getDatabase(app);
-  const cardsRef = ref(db, 'cards');
-
-  let isAdmin = false;
-
-  function renderCards(snapshot) {
-    const grid = document.getElementById("cardGrid");
-    grid.innerHTML = "";
-    const data = snapshot.val();
-    for (let id in data) {
-      const cardData = data[id];
-      const card = document.createElement("div");
-      card.className = "card";
-      card.style.backgroundColor = cardData.color;
-      const removeButton = isAdmin
-        ? `<button class="remove-btn" onclick="removeCard('${id}')">×</button>`
-        : "";
-      card.innerHTML = `${removeButton}<h3>${cardData.name}</h3><p>${cardData.word}</p><time>${cardData.time}</time>`;
-      grid.appendChild(card);
-    }
+<script>
+  function toggleDarkMode() {
+    document.body.classList.toggle('dark-mode');
   }
-
-  onValue(cardsRef, renderCards);
-
-  window.addCard = function () {
-    const name = document.getElementById("name").value.trim();
-    const word = document.getElementById("word").value.trim();
-    const color = document.getElementById("color").value;
-    if (!name || !word) {
-      alert("Vul zowel je naam als een woord in!");
-      return;
-    }
-    const now = new Date();
-    const formattedTime = now.toLocaleDateString('nl-BE') + " " + now.toLocaleTimeString('nl-BE');
-    push(cardsRef, { name, word, color, time: formattedTime });
-    document.getElementById("name").value = "";
-    document.getElementById("word").value = "";
-    document.getElementById("color").selectedIndex = 0;
-  };
-
-  window.removeCard = function (id) {
-    if (!isAdmin) return;
-    const cardToDelete = ref(db, `cards/${id}`);
-    remove(cardToDelete);
-  };
-
-  window.openModal = function () {
-    document.getElementById("loginModal").style.display = "block";
-  };
-
-  window.closeModal = function () {
-    document.getElementById("loginModal").style.display = "none";
-    document.getElementById("adminPassword").value = "";
-  };
-
-  window.login = function () {
-    const pw = document.getElementById("adminPassword").value;
-    if (pw === "admin123") {
-      isAdmin = true;
-      alert("Je bent nu ingelogd als admin.");
-      closeModal();
-      onValue(cardsRef, renderCards); // opnieuw tekenen met verwijderknoppen
-    } else {
-      alert("Verkeerd wachtwoord.");
-    }
-  };
 </script>
-
-</body>
-</html>
