@@ -36,22 +36,12 @@
       color: white;
     }
 
-    .top-bar .dark {
-      background-color: coral;
-    }
-
-    .top-bar .admin {
-      background-color: #333;
-    }
+    .dark { background-color: coral; }
+    .admin { background-color: #333; }
 
     .logo {
       margin-top: 70px;
       max-width: 200px;
-    }
-
-    h1 {
-      margin-top: 10px;
-      font-size: 24px;
     }
 
     .form {
@@ -91,10 +81,6 @@
       position: relative;
     }
 
-    .card h3 {
-      margin-top: 0;
-    }
-
     .like-section {
       margin-top: 10px;
       display: flex;
@@ -114,7 +100,71 @@
       width: 24px;
       height: 24px;
     }
+
+    /* Modal styles */
+    .modal {
+      display: none;
+      position: fixed;
+      z-index: 2001;
+      left: 0; top: 0;
+      width: 100%; height: 100%;
+      background-color: rgba(0,0,0,0.5);
+    }
+
+    .modal-content {
+      background: white;
+      margin: 10% auto;
+      padding: 20px;
+      width: 90%;
+      max-width: 400px;
+      border-radius: 10px;
+      text-align: center;
+    }
+
+    .close {
+      position: absolute;
+      top: 10px;
+      right: 20px;
+      font-size: 20px;
+      cursor: pointer;
+    }
   </style>
+</head>
+<body>
+  <div class="top-bar">
+    <button class="dark" onclick="toggleDarkMode()">🌓</button>
+    <button class="admin" onclick="openModal()">🔐 Admin</button>
+  </div>
+
+  <img src="logo.png" class="logo" alt="Logo Leerlingenraad" />
+  <h1>Welk woord zeggen de leerkrachten?</h1>
+
+  <div class="form">
+    <input id="name" placeholder="Naam">
+    <input id="word" placeholder="Woord">
+    <select id="color">
+      <option value="rgba(255, 0, 0, 0.7)">🔴 Rood</option>
+      <option value="rgba(0, 0, 255, 0.7)">🔵 Blauw</option>
+      <option value="rgba(0, 128, 0, 0.7)">🟢 Groen</option>
+      <option value="rgba(255, 255, 0, 0.7)">🟡 Geel</option>
+      <option value="rgba(255, 165, 0, 0.7)">🟠 Oranje</option>
+      <option value="rgba(128, 0, 128, 0.7)">🟣 Paars</option>
+    </select>
+    <button onclick="addCard()">Verstuur</button>
+  </div>
+
+  <div class="grid" id="cardGrid"></div>
+
+  <!-- Modal -->
+  <div id="loginModal" class="modal">
+    <div class="modal-content">
+      <span class="close" onclick="closeModal()">&times;</span>
+      <h2>Admin login</h2>
+      <input id="email" type="email" placeholder="E-mailadres">
+      <input id="password" type="password" placeholder="Wachtwoord">
+      <button onclick="login()">Inloggen</button>
+    </div>
+  </div>
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
@@ -146,6 +196,7 @@
         onValue(adminCheckRef, (snap) => {
           if (snap.exists()) {
             isAdmin = true;
+            closeModal();
             alert("Je bent ingelogd als admin.");
             if (latestSnapshot) renderCards(latestSnapshot);
           } else {
@@ -171,9 +222,7 @@
           <h3>${card.name}</h3>
           <p>${card.word}</p>
           <time>${card.time}</time>
-          <div class="like-section">
-            ❤️ <span>${likes}</span>
-          </div>
+          <div class="like-section">❤️ ${likes}</div>
           ${remove}
         `;
         grid.appendChild(div);
@@ -195,10 +244,6 @@
       remove(ref(db, `cards/${id}`));
     };
 
-    window.likeCard = function (id, currentLikes) {
-      update(ref(db, `cards/${id}`), { likes: currentLikes + 1 });
-    };
-
     window.login = function () {
       const email = document.getElementById("email").value;
       const password = document.getElementById("password").value;
@@ -207,41 +252,17 @@
         .catch(err => alert("Fout: " + err.message));
     };
 
+    window.openModal = function () {
+      document.getElementById("loginModal").style.display = "block";
+    };
+
+    window.closeModal = function () {
+      document.getElementById("loginModal").style.display = "none";
+    };
+
     window.toggleDarkMode = function () {
       document.body.classList.toggle('dark-mode');
     };
   </script>
-</head>
-<body>
-  <div class="top-bar">
-    <button class="dark" onclick="toggleDarkMode()">🌓</button>
-    <button class="admin" onclick="alert('Admin login via formulier hieronder')">🔐 Admin</button>
-  </div>
-
-  <img src="logo.png" class="logo" alt="Logo Leerlingenraad" />
-  <h1>Welk woord zeggen de leerkrachten?</h1>
-
-  <div class="form">
-    <input id="name" placeholder="Naam">
-    <input id="word" placeholder="Woord">
-    <select id="color">
-      <option value="rgba(255, 0, 0, 0.7)">🔴 Rood</option>
-      <option value="rgba(0, 0, 255, 0.7)">🔵 Blauw</option>
-      <option value="rgba(0, 128, 0, 0.7)">🟢 Groen</option>
-      <option value="rgba(255, 255, 0, 0.7)">🟡 Geel</option>
-      <option value="rgba(255, 165, 0, 0.7)">🟠 Oranje</option>
-      <option value="rgba(128, 0, 128, 0.7)">🟣 Paars</option>
-    </select>
-    <button onclick="addCard()">Verstuur</button>
-  </div>
-
-  <div class="form">
-    <h3>Admin login</h3>
-    <input id="email" placeholder="E-mailadres" type="email">
-    <input id="password" placeholder="Wachtwoord" type="password">
-    <button onclick="login()">Inloggen</button>
-  </div>
-
-  <div class="grid" id="cardGrid"></div>
 </body>
 </html>
