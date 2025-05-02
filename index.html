@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="nl">
 <head>
@@ -27,7 +28,7 @@
       padding: 20px;
     }
     .container {
-      max-width: 1200px;
+      max-width: 900px;
       margin: auto;
     }
     .logo {
@@ -92,14 +93,8 @@
     }
     .grid {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
       gap: 15px;
-      justify-content: center;
-    }
-    @media (min-width: 1000px) {
-      .grid {
-        grid-template-columns: repeat(5, 1fr);
-      }
     }
     .card {
       border-radius: 10px;
@@ -210,17 +205,11 @@
     <input type="text" id="word" placeholder="Woord of bericht">
     <select id="color">
       <option value="rgba(255, 0, 0, 0.7)">🔴 Rood</option>
-	  <option value="rgba(0, 0, 255, 0.7)">🔵 Blauw</option>
+      <option value="rgba(0, 0, 255, 0.7)">🔵 Blauw</option>
       <option value="rgba(0, 128, 0, 0.7)">🟢 Groen</option>
       <option value="rgba(255, 255, 0, 0.7)">🟡 Geel</option>
       <option value="rgba(255, 165, 0, 0.7)">🟠 Oranje</option>
-     <option value="rgba(128, 0, 128, 0.7)">🟣 Paars</option>
-     <option value="rgba(173, 216, 230, 0.7)">🩵 Lichtblauw</option>
-     <option value="rgba(255, 182, 193, 0.7)">🩷 Roze</option>
-     <option value="rgba(139, 69, 19, 0.7)">🤎 Bruin</option>
-     <option value="rgba(50, 50, 50, 0.7)">⚫ Donkergrijs</option>
-     <option value="rgba(245, 245, 245, 0.7)">🤍 Witgrijs</option>
-     <option value="rgba(25, 25, 112, 0.7)">🫐 Donkerblauw</option>
+      <option value="rgba(128, 0, 128, 0.7)">🟣 Paars</option>
     </select>
     <button onclick="addCard()">Verstuur</button>
   </div>
@@ -235,11 +224,12 @@
   const firebaseConfig = {
     apiKey: "AIzaSyBvJuRQMqjfc-Kwl2bCAxA5dejCh_ZFQQw",
     authDomain: "padlet-bea3c.firebaseapp.com",
-    databaseURL: "https://padlet-bea3c-default-rtdb.europe-west1.firebasedatabase.app/",
     projectId: "padlet-bea3c",
-    storageBucket: "padlet-bea3c.appspot.com",
+    storageBucket: "padlet-bea3c.firebasestorage.app",
     messagingSenderId: "873457849726",
-    appId: "1:873457849726:web:158348903d437928d9cf2f"
+    appId: "1:873457849726:web:158348903d437928d9cf2f",
+    measurementId: "G-GW8PNR0235",
+    databaseURL: "https://padlet-bea3c-default-rtdb.europe-west1.firebasedatabase.app/"
   };
 
   const app = initializeApp(firebaseConfig);
@@ -257,9 +247,7 @@
       const card = document.createElement("div");
       card.className = "card";
       card.style.backgroundColor = cardData.color;
-      const removeButton = isAdmin
-        ? `<button class="remove-btn" onclick="removeCard('${id}')">×</button>`
-        : "";
+      const removeButton = isAdmin ? `<button class="remove-btn" onclick="removeCard('${id}')">×</button>` : "";
       const likes = cardData.likes || 0;
       card.innerHTML = `
         ${removeButton}
