@@ -1,8 +1,121 @@
+
 <!DOCTYPE html>
 <html lang="nl">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Welk woord zeggen de leerkrachten?</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: #fefcf8;
+      margin: 0;
+      padding: 20px;
+      text-align: center;
+    }
+
+    .top-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px 20px;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      background: #2c2c2c;
+      z-index: 1000;
+    }
+
+    .top-bar button {
+      padding: 10px 20px;
+      border: none;
+      border-radius: 8px;
+      font-size: 16px;
+      cursor: pointer;
+      color: white;
+    }
+
+    .top-bar .dark {
+      background-color: coral;
+    }
+
+    .top-bar .admin {
+      background-color: #333;
+    }
+
+    .logo {
+      margin-top: 70px;
+      max-width: 200px;
+    }
+
+    h1 {
+      margin-top: 10px;
+      font-size: 24px;
+    }
+
+    .form {
+      margin: 20px auto;
+      max-width: 500px;
+    }
+
+    input, select, button {
+      width: 100%;
+      padding: 12px;
+      margin: 6px 0;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      font-size: 16px;
+    }
+
+    button {
+      background-color: coral;
+      color: white;
+      border: none;
+      cursor: pointer;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      gap: 16px;
+      margin-top: 30px;
+    }
+
+    .card {
+      padding: 16px;
+      border-radius: 12px;
+      color: #000;
+      text-align: left;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+      position: relative;
+    }
+
+    .card h3 {
+      margin-top: 0;
+    }
+
+    .like-section {
+      margin-top: 10px;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .remove-btn {
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      background: #e74c3c;
+      color: white;
+      border: none;
+      border-radius: 50%;
+      cursor: pointer;
+      width: 24px;
+      height: 24px;
+    }
+  </style>
+
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
     import { getDatabase, ref, push, onValue, remove, update } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
@@ -52,16 +165,16 @@
         const div = document.createElement("div");
         div.className = "card";
         div.style.backgroundColor = card.color;
-        const remove = isAdmin ? `<button onclick="removeCard('${id}')">🗑️</button>` : "";
+        const remove = isAdmin ? `<button class="remove-btn" onclick="removeCard('${id}')">×</button>` : "";
         const likes = card.likes || 0;
         div.innerHTML = `
           <h3>${card.name}</h3>
           <p>${card.word}</p>
           <time>${card.time}</time>
-          <div>
-            <button onclick="likeCard('${id}', ${likes})">❤️</button> ${likes}
-            ${remove}
+          <div class="like-section">
+            ❤️ <span>${likes}</span>
           </div>
+          ${remove}
         `;
         grid.appendChild(div);
       }
@@ -93,32 +206,42 @@
         .then(() => alert("Ingelogd!"))
         .catch(err => alert("Fout: " + err.message));
     };
+
+    window.toggleDarkMode = function () {
+      document.body.classList.toggle('dark-mode');
+    };
   </script>
 </head>
 <body>
+  <div class="top-bar">
+    <button class="dark" onclick="toggleDarkMode()">🌓</button>
+    <button class="admin" onclick="alert('Admin login via formulier hieronder')">🔐 Admin</button>
+  </div>
+
+  <img src="logo.png" class="logo" alt="Logo Leerlingenraad" />
   <h1>Welk woord zeggen de leerkrachten?</h1>
 
-  <input id="name" placeholder="Naam"><br>
-  <input id="word" placeholder="Woord"><br>
-  <select id="color">
-    <option value="rgba(255, 0, 0, 0.7)">🔴 Rood</option>
-    <option value="rgba(0, 0, 255, 0.7)">🔵 Blauw</option>
-    <option value="rgba(0, 128, 0, 0.7)">🟢 Groen</option>
-    <option value="rgba(255, 255, 0, 0.7)">🟡 Geel</option>
-    <option value="rgba(255, 165, 0, 0.7)">🟠 Oranje</option>
-    <option value="rgba(128, 0, 128, 0.7)">🟣 Paars</option>
-  </select><br>
-  <button onclick="addCard()">Verstuur</button>
+  <div class="form">
+    <input id="name" placeholder="Naam">
+    <input id="word" placeholder="Woord">
+    <select id="color">
+      <option value="rgba(255, 0, 0, 0.7)">🔴 Rood</option>
+      <option value="rgba(0, 0, 255, 0.7)">🔵 Blauw</option>
+      <option value="rgba(0, 128, 0, 0.7)">🟢 Groen</option>
+      <option value="rgba(255, 255, 0, 0.7)">🟡 Geel</option>
+      <option value="rgba(255, 165, 0, 0.7)">🟠 Oranje</option>
+      <option value="rgba(128, 0, 128, 0.7)">🟣 Paars</option>
+    </select>
+    <button onclick="addCard()">Verstuur</button>
+  </div>
 
-  <hr>
+  <div class="form">
+    <h3>Admin login</h3>
+    <input id="email" placeholder="E-mailadres" type="email">
+    <input id="password" placeholder="Wachtwoord" type="password">
+    <button onclick="login()">Inloggen</button>
+  </div>
 
-  <h2>Admin login</h2>
-  <input id="email" type="email" placeholder="E-mailadres"><br>
-  <input id="password" type="password" placeholder="Wachtwoord"><br>
-  <button onclick="login()">Inloggen</button>
-
-  <hr>
-
-  <div id="cardGrid"></div>
+  <div class="grid" id="cardGrid"></div>
 </body>
 </html>
