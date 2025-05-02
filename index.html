@@ -122,6 +122,7 @@
     <option value="rgba(128,0,128,0.7)">🟣 Paars</option>
   
 <option value="rgba(135, 206, 250, 0.7)">🔵 Lichtblauw</option>
+<option value="rgba(139, 0, 0, 0.7)">🔴 Donkerrood</option>
 <option value="rgba(144, 238, 144, 0.7)">🟢 Lichtgroen</option>
 <option value="rgba(128, 128, 128, 0.7)">⚫ Grijs</option>
 <option value="rgba(255, 105, 180, 0.7)">🟣 Roze</option>
@@ -205,6 +206,7 @@
   });
 
   
+
 onValue(cardsRef, snapshot => {
   const grid = document.getElementById("cardGrid");
   grid.innerHTML = "";
@@ -214,34 +216,51 @@ onValue(cardsRef, snapshot => {
     if (!card.approved && !isAdmin) continue;
 
     const div = document.createElement("div");
-    div.id = 'card-' + id;
-    div.dataset.name = card.name;
-    div.dataset.word = card.word;
-    div.dataset.color = card.color;
     div.className = "card";
-    div.style.backgroundColor = card.color;
-    let html = `
-      <h3>${card.name}</h3>
-      <p>${card.word}</p>
-      <time>${card.time}</time>
-      <div class='like-section'>
-        <button onclick="likeCard('${id}', ${card.likes || 0})">❤️</button> ${card.likes || 0}
-      </div>
-    `;
+    div.style.backgroundColor = card.color || "#fff";
+    div.style.borderRadius = "12px";
+    div.style.boxShadow = "0 2px 6px rgba(0,0,0,0.1)";
+    div.style.padding = "16px";
+    div.style.position = "relative";
+    div.style.whiteSpace = "pre-wrap";
+
+    const name = document.createElement("div");
+    name.innerHTML = `<strong>${card.name}</strong>`;
+    name.style.fontSize = "15px";
+    name.style.marginBottom = "2px";
+    div.appendChild(name);
+
+    const time = document.createElement("div");
+    time.innerText = card.time || "";
+    time.style.fontSize = "12px";
+    time.style.color = "#555";
+    time.style.marginBottom = "8px";
+    div.appendChild(time);
+
+    const title = document.createElement("div");
+    title.innerHTML = `<strong>${card.word}</strong>`;
+    title.style.fontSize = "16px";
+    title.style.marginBottom = "8px";
+    div.appendChild(title);
+
+    const likes = document.createElement("div");
+    likes.className = "like-section";
+    likes.innerHTML = `<button onclick="likeCard('${id}', ${card.likes || 0})">❤️</button> ${card.likes || 0}`;
+    div.appendChild(likes);
 
     if (isAdmin) {
-      html += `<div style='font-size:13px; color:#222;'>📧 ${card.user}</div>`;
-      html += `<button class="remove-btn" onclick="removeCard('${id}')">×</button>`;
+      div.innerHTML += `<div style='font-size:13px; color:#222;'>📧 ${card.user}</div>`;
+      div.innerHTML += `<button class="remove-btn" onclick="removeCard('${id}')">×</button>`;
       if (!card.approved) {
-        html += `<button class="remove-btn" style="right: 70px; background: #555;" onclick="updateCard('${id}')">✏️</button>`;
-        html += `<button class="remove-btn" style="right: 40px; background: green;" onclick="approveCard('${id}')">✔</button>`;
+        div.innerHTML += `<button class="remove-btn" style="right: 40px; background: green;" onclick="approveCard('${id}')">✔</button>`;
+        div.innerHTML += `<button class="remove-btn" style="right: 70px; background: #555;" onclick="updateCard('${id}')">✏️</button>`;
       }
     }
 
-    div.innerHTML = html;
     grid.appendChild(div);
   }
 });
+
 
 
   window.addCard = function () {
