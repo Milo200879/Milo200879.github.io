@@ -2,7 +2,7 @@
 <!DOCTYPE html>
 <html lang="nl">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Welk woord zeggen de leerkrachten?</title>
   <style>
@@ -10,9 +10,7 @@
       font-family: 'Segoe UI', sans-serif;
       background: #fefbf6;
       margin: 0;
-      padding: 0;
     }
-
     .top-bar {
       background: #2c2c2c;
       color: white;
@@ -21,7 +19,6 @@
       align-items: center;
       padding: 12px 20px;
     }
-
     .top-bar button {
       background: coral;
       border: none;
@@ -31,27 +28,23 @@
       font-size: 16px;
       cursor: pointer;
     }
-
     .logo {
       display: block;
       margin: 40px auto 10px auto;
       max-width: 180px;
     }
-
     h1 {
       text-align: center;
       margin: 10px auto 20px auto;
       font-size: 24px;
       color: #222;
     }
-
     .form-container {
       max-width: 400px;
       margin: 0 auto 30px auto;
       padding: 0 20px;
       text-align: center;
     }
-
     input, select, button {
       width: 100%;
       padding: 12px;
@@ -59,16 +52,13 @@
       font-size: 16px;
       border-radius: 6px;
       border: 1px solid #ccc;
-      box-sizing: border-box;
     }
-
     .submit-btn {
       background: coral;
       color: white;
       border: none;
       font-weight: bold;
     }
-
     .grid {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
@@ -77,53 +67,12 @@
       max-width: 1200px;
       margin: 0 auto;
     }
-
     .card {
       background: white;
       border-radius: 12px;
       padding: 16px;
       box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-      position: relative;
     }
-
-    .card h3 {
-      margin: 0 0 10px 0;
-    }
-
-    .card time {
-      display: block;
-      margin-top: 10px;
-      font-size: 12px;
-      color: #555;
-    }
-
-    .like-section {
-      margin-top: 10px;
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      font-size: 16px;
-    }
-
-    .like-section button {
-      background: none;
-      border: none;
-      cursor: pointer;
-    }
-
-    .remove-btn {
-      position: absolute;
-      top: 10px;
-      right: 10px;
-      background: crimson;
-      color: white;
-      border: none;
-      border-radius: 50%;
-      width: 24px;
-      height: 24px;
-      cursor: pointer;
-    }
-
     .modal {
       display: none;
       position: fixed;
@@ -132,7 +81,6 @@
       width: 100%; height: 100%;
       background: rgba(0,0,0,0.5);
     }
-
     .modal-content {
       background: white;
       padding: 20px;
@@ -147,7 +95,7 @@
 
 <div class="top-bar">
   <button onclick="toggleDarkMode()">🌗</button>
-  <button onclick="openModal()">🔐 Admin</button>
+  <button onclick="openModal()">🔐 Aanmelden</button>
 </div>
 
 <img src="logo.png" alt="Leerlingenraad" class="logo" />
@@ -172,29 +120,112 @@
 
 <div class="modal" id="loginModal">
   <div class="modal-content">
-    <h2>Login vereist</h2>
+    <h2>Log in of registreer</h2>
     <input id="email" type="email" placeholder="E-mailadres" />
     <input id="password" type="password" placeholder="Wachtwoord" />
     <button onclick="login()">Inloggen</button>
+    <button onclick="signup()">Account aanmaken</button>
   </div>
 </div>
 
 <script type="module">
-// Hier voeg je Firebase imports + setup + event listeners toe
-// Zie eerdere codeblokken voor volledige Firebase-integratie
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+  import { getDatabase, ref, push, onValue } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+  import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyBvJuRQMqjfc-Kwl2bCAxA5dejCh_ZFQQw",
+    authDomain: "padlet-bea3c.firebaseapp.com",
+    databaseURL: "https://padlet-bea3c-default-rtdb.europe-west1.firebasedatabase.app",
+    projectId: "padlet-bea3c",
+    storageBucket: "padlet-bea3c.appspot.com",
+    messagingSenderId: "873457849726",
+    appId: "1:873457849726:web:158348903d437928d9cf2f"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const db = getDatabase(app);
+  const auth = getAuth(app);
+  const cardsRef = ref(db, "cards");
+
+  let isAdmin = false;
+
+  onAuthStateChanged(auth, user => {
+    const form = document.getElementById("inputForm");
+    const logoutBtn = document.getElementById("logoutBtn");
+    const grid = document.getElementById("cardGrid");
+    if (user) {
+      form.style.display = "block";
+      grid.style.display = "grid";
+      logoutBtn.style.display = "inline-block";
+      closeModal();
+    } else {
+      form.style.display = "none";
+      grid.style.display = "none";
+      logoutBtn.style.display = "none";
+      openModal();
+    }
+  });
+
+  window.login = function () {
+    const email = document.getElementById("email").value;
+    const pw = document.getElementById("password").value;
+    signInWithEmailAndPassword(auth, email, pw)
+      .then(() => alert("Ingelogd!"))
+      .catch(e => alert("Fout: " + e.message));
+  };
+
+  window.signup = function () {
+    const email = document.getElementById("email").value;
+    const pw = document.getElementById("password").value;
+    createUserWithEmailAndPassword(auth, email, pw)
+      .then(() => alert("Account aangemaakt! Je bent ingelogd."))
+      .catch(e => alert("Registratiefout: " + e.message));
+  };
+
+  window.logout = function () {
+    signOut(auth).then(() => alert("Uitgelogd."));
+  };
+
+  window.addCard = function () {
+    const name = document.getElementById("name").value;
+    const word = document.getElementById("word").value;
+    const color = document.getElementById("color").value;
+    const now = new Date().toLocaleString();
+    push(cardsRef, { name, word, color, time: now, likes: 0 });
+  };
+
+  window.openModal = function () {
+    document.getElementById("loginModal").style.display = "block";
+  };
+
+  window.closeModal = function () {
+    document.getElementById("loginModal").style.display = "none";
+  };
+
+  onValue(cardsRef, snapshot => {
+    const grid = document.getElementById("cardGrid");
+    grid.innerHTML = "";
+    const data = snapshot.val();
+    for (let id in data) {
+      const card = data[id];
+      const div = document.createElement("div");
+      div.className = "card";
+      div.style.backgroundColor = card.color;
+      div.innerHTML = `
+        <h3>${card.name}</h3>
+        <p>${card.word}</p>
+        <time>${card.time}</time>
+        <div>❤️ ${card.likes || 0}</div>
+      `;
+      grid.appendChild(div);
+    }
+  });
 </script>
 
 <script>
 function toggleDarkMode() {
   document.body.classList.toggle("dark-mode");
-}
-
-function openModal() {
-  document.getElementById("loginModal").style.display = "block";
-}
-
-function closeModal() {
-  document.getElementById("loginModal").style.display = "none";
 }
 </script>
 
