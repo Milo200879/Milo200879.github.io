@@ -2,7 +2,7 @@
 <!DOCTYPE html>
 <html lang="nl">
 <head>
-  <meta charset="UTF-8" />
+  <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Welk woord zeggen de leerkrachten?</title>
   <style>
@@ -83,6 +83,7 @@
       border-radius: 12px;
       padding: 16px;
       box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+      position: relative;
     }
 
     .card h3 {
@@ -109,84 +110,93 @@
       border: none;
       cursor: pointer;
     }
+
+    .remove-btn {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      background: crimson;
+      color: white;
+      border: none;
+      border-radius: 50%;
+      width: 24px;
+      height: 24px;
+      cursor: pointer;
+    }
+
+    .modal {
+      display: none;
+      position: fixed;
+      z-index: 1001;
+      left: 0; top: 0;
+      width: 100%; height: 100%;
+      background: rgba(0,0,0,0.5);
+    }
+
+    .modal-content {
+      background: white;
+      padding: 20px;
+      border-radius: 10px;
+      max-width: 360px;
+      margin: 15% auto;
+      text-align: center;
+    }
   </style>
 </head>
 <body>
 
-  <div class="top-bar">
-    <button onclick="toggleDarkMode()">🌗</button>
-    <button onclick="openModal()">🔐 Admin</button>
+<div class="top-bar">
+  <button onclick="toggleDarkMode()">🌗</button>
+  <button onclick="openModal()">🔐 Admin</button>
+</div>
+
+<img src="logo.png" alt="Leerlingenraad" class="logo" />
+<h1>Welk woord zeggen de leerkrachten?</h1>
+
+<div class="form-container" id="inputForm" style="display: none;">
+  <input type="text" placeholder="Naam" id="name" />
+  <input type="text" placeholder="Woord" id="word" />
+  <select id="color">
+    <option value="rgba(255, 0, 0, 0.7)">🔴 Rood</option>
+    <option value="rgba(0, 0, 255, 0.7)">🔵 Blauw</option>
+    <option value="rgba(0, 128, 0, 0.7)">🟢 Groen</option>
+    <option value="rgba(255, 255, 0, 0.7)">🟡 Geel</option>
+    <option value="rgba(255, 165, 0, 0.7)">🟠 Oranje</option>
+    <option value="rgba(128, 0, 128, 0.7)">🟣 Paars</option>
+  </select>
+  <button class="submit-btn" onclick="addCard()">Verstuur</button>
+  <button onclick="logout()" id="logoutBtn" style="display:none;">🚪 Uitloggen</button>
+</div>
+
+<div class="grid" id="cardGrid"></div>
+
+<div class="modal" id="loginModal">
+  <div class="modal-content">
+    <h2>Login vereist</h2>
+    <input id="email" type="email" placeholder="E-mailadres" />
+    <input id="password" type="password" placeholder="Wachtwoord" />
+    <button onclick="login()">Inloggen</button>
   </div>
+</div>
 
-  <img src="logo.png" alt="Leerlingenraad" class="logo" />
-  <h1>Welk woord zeggen de leerkrachten?</h1>
+<script type="module">
+// Hier voeg je Firebase imports + setup + event listeners toe
+// Zie eerdere codeblokken voor volledige Firebase-integratie
+</script>
 
-  <div class="form-container">
-    <input type="text" placeholder="Naam" id="name" />
-    <input type="text" placeholder="Woord" id="word" />
-    <select id="color">
-      <option value="rgba(255, 0, 0, 0.7)">🔴 Rood</option>
-      <option value="rgba(0, 0, 255, 0.7)">🔵 Blauw</option>
-      <option value="rgba(0, 128, 0, 0.7)">🟢 Groen</option>
-      <option value="rgba(255, 255, 0, 0.7)">🟡 Geel</option>
-      <option value="rgba(255, 165, 0, 0.7)">🟠 Oranje</option>
-      <option value="rgba(128, 0, 128, 0.7)">🟣 Paars</option>
-    </select>
-    <button class="submit-btn" onclick="addCard()">Verstuur</button>
-  </div>
+<script>
+function toggleDarkMode() {
+  document.body.classList.toggle("dark-mode");
+}
 
-  <div class="grid" id="cardGrid">
-    <div class="card" style="background-color: #ff4d4d;">
-      <h3>Leerling 1</h3>
-      <p>Woord1</p>
-      <time>2/5/2025 18:02:16</time>
-      <div class="like-section">❤️ 0</div>
-    </div>
-    <div class="card" style="background-color: #4d79ff;">
-      <h3>Leerling 2</h3>
-      <p>Woord 2</p>
-      <time>2/5/2025 18:02:27</time>
-      <div class="like-section">❤️ 11</div>
-    </div>
-    <div class="card" style="background-color: #2ecc71;">
-      <h3>Leerling 3</h3>
-      <p>Woord 3</p>
-      <time>2/5/2025 18:02:57</time>
-      <div class="like-section">❤️ 8</div>
-    </div>
-    <div class="card" style="background-color: #ffff66;">
-      <h3>Leerling 4</h3>
-      <p>Woord 4</p>
-      <time>2/5/2025 18:03:10</time>
-      <div class="like-section">❤️ 0</div>
-    </div>
-    <div class="card" style="background-color: #ffb347;">
-      <h3>Leerling 5</h3>
-      <p>Woord 5</p>
-      <time>2/5/2025 18:03:18</time>
-      <div class="like-section">❤️ 0</div>
-    </div>
-    <div class="card" style="background-color: #a64ca6;">
-      <h3>Leerling 6</h3>
-      <p>Woord 6</p>
-      <time>2/5/2025 18:03:28</time>
-      <div class="like-section">❤️ 0</div>
-    </div>
-  </div>
+function openModal() {
+  document.getElementById("loginModal").style.display = "block";
+}
 
-  <script>
-    function toggleDarkMode() {
-      document.body.classList.toggle('dark-mode');
-    }
-
-    function openModal() {
-      alert('Admin login popup (in te bouwen)');
-    }
-
-    function addCard() {
-      alert('Kaartje zou nu worden toegevoegd via Firebase.');
-    }
-  </script>
+function closeModal() {
+  document.getElementById("loginModal").style.display = "none";
+}
+</script>
 
 </body>
 </html>
