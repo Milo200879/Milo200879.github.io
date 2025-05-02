@@ -183,7 +183,13 @@
       form.style.display = "block";
       logoutBtn.style.display = "inline-block";
       closeModal();
-      if (user.email === "thomasdewever@dvmhumaniora.be") {
+      const input = document.getElementById("name");
+    if (input && !input.value) {
+      const emailName = user.email.split("@")[0];
+      const prefill = emailName.charAt(0).toUpperCase() + emailName.slice(1).toLowerCase();
+      input.value = prefill;
+    }
+    if (user.email === "thomasdewever@dvmhumaniora.be") {
       const input = document.getElementById("name");
       if (input && !input.value) {
         const emailName = user.email.split("@")[0];
