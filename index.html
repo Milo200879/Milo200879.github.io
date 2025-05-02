@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="nl">
 <head>
@@ -28,7 +27,7 @@
       padding: 20px;
     }
     .container {
-      max-width: 900px;
+      max-width: 1200px;
       margin: auto;
     }
     .logo {
@@ -93,8 +92,14 @@
     }
     .grid {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
       gap: 15px;
+      justify-content: center;
+    }
+    @media (min-width: 1000px) {
+      .grid {
+        grid-template-columns: repeat(5, 1fr);
+      }
     }
     .card {
       border-radius: 10px;
@@ -224,12 +229,11 @@
   const firebaseConfig = {
     apiKey: "AIzaSyBvJuRQMqjfc-Kwl2bCAxA5dejCh_ZFQQw",
     authDomain: "padlet-bea3c.firebaseapp.com",
+    databaseURL: "https://padlet-bea3c-default-rtdb.europe-west1.firebasedatabase.app/",
     projectId: "padlet-bea3c",
-    storageBucket: "padlet-bea3c.firebasestorage.app",
+    storageBucket: "padlet-bea3c.appspot.com",
     messagingSenderId: "873457849726",
-    appId: "1:873457849726:web:158348903d437928d9cf2f",
-    measurementId: "G-GW8PNR0235",
-    databaseURL: "https://padlet-bea3c-default-rtdb.europe-west1.firebasedatabase.app/"
+    appId: "1:873457849726:web:158348903d437928d9cf2f"
   };
 
   const app = initializeApp(firebaseConfig);
@@ -247,7 +251,9 @@
       const card = document.createElement("div");
       card.className = "card";
       card.style.backgroundColor = cardData.color;
-      const removeButton = isAdmin ? `<button class="remove-btn" onclick="removeCard('${id}')">×</button>` : "";
+      const removeButton = isAdmin
+        ? `<button class="remove-btn" onclick="removeCard('${id}')">×</button>`
+        : "";
       const likes = cardData.likes || 0;
       card.innerHTML = `
         ${removeButton}
