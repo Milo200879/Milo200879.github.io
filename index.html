@@ -125,6 +125,7 @@
 	<option value="rgba(128, 128, 128, 0.7)">⚫ Grijs</option>
 	<option value="rgba(255, 105, 180, 0.7)">🟣 Roze</option>
 	<option value="rgba(64, 224, 208, 0.7)">🔵 Turquoise</option>
+
   </select>
   <button class="submit-btn" onclick="addCard()">Verstuur</button>
   <button onclick="logout()" id="logoutBtn" style="display:none;">🚪 Uitloggen</button>
@@ -135,6 +136,11 @@
 <div class="modal" id="loginModal">
   <div class="modal-content">
     <h2>Login of registreer</h2>
+    <p style="font-size: 14px; color: #333; margin-top: -10px;">
+      Je moet verplicht inloggen met jouw DvM-mailadres,<br>
+      je mag een wachtwoord kiezen waarmee je in de toekomst ook nog woorden kan invoeren.<br>
+      <strong style="color: red;">!!! Dit is en moet NIET het wachtwoord van jouw DvM-mailadres zijn !!!</strong>
+    </p>
     <input id="email" type="email" placeholder="E-mailadres" />
     <input id="password" type="password" placeholder="Wachtwoord" />
     <button onclick="login()">Inloggen</button>
