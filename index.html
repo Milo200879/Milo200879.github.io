@@ -216,7 +216,11 @@
         <h3>${card.name}</h3>
         <p>${card.word}</p>
         <time>${card.time}</time>
-        <div>❤️ ${card.likes || 0}</div>
+        <div class='like-section'>
+        <button onclick="likeCard('${id}', ${card.likes || 0})">❤️</button> ${card.likes || 0}
+      </div>
+      ${isAdmin ? `<button class='remove-btn' onclick="removeCard('${id}')">×</button>` : ''}
+      ${(isAdmin && card.user) ? `<div style='font-size:12px;color:#666;margin-top:8px;'>📧 ${card.user}</div>` : ''}
       `;
       grid.appendChild(div);
     }
@@ -231,3 +235,21 @@ function toggleDarkMode() {
 
 </body>
 </html>
+
+<script>
+  window.likeCard = function(id, currentLikes) {
+    import('https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js').then(({ getDatabase, ref, update }) => {
+      const db = getDatabase();
+      update(ref(db, 'cards/' + id), { likes: currentLikes + 1 });
+    });
+  };
+
+  window.removeCard = function(id) {
+    import('https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js').then(({ getDatabase, ref, remove }) => {
+      const db = getDatabase();
+      if (confirm('Weet je zeker dat je dit kaartje wilt verwijderen?')) {
+        remove(ref(db, 'cards/' + id));
+      }
+    });
+  };
+</script>
