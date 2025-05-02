@@ -189,6 +189,25 @@
 
   let isAdmin = false;
 
+  function renderCards(snapshot) {
+    const grid = document.getElementById("cardGrid");
+    grid.innerHTML = "";
+    const data = snapshot.val();
+    for (let id in data) {
+      const cardData = data[id];
+      const card = document.createElement("div");
+      card.className = "card";
+      card.style.backgroundColor = cardData.color;
+      const removeButton = isAdmin
+        ? `<button class="remove-btn" onclick="removeCard('${id}')">×</button>`
+        : "";
+      card.innerHTML = `${removeButton}<h3>${cardData.name}</h3><p>${cardData.word}</p><time>${cardData.time}</time>`;
+      grid.appendChild(card);
+    }
+  }
+
+  onValue(cardsRef, renderCards);
+
   window.addCard = function () {
     const name = document.getElementById("name").value.trim();
     const word = document.getElementById("word").value.trim();
@@ -204,23 +223,6 @@
     document.getElementById("word").value = "";
     document.getElementById("color").selectedIndex = 0;
   };
-
-  onValue(cardsRef, (snapshot) => {
-    const grid = document.getElementById("cardGrid");
-    grid.innerHTML = "";
-    const data = snapshot.val();
-    for (let id in data) {
-      const cardData = data[id];
-      const card = document.createElement("div");
-      card.className = "card";
-      card.style.backgroundColor = cardData.color;
-      const removeButton = isAdmin
-        ? `<button class="remove-btn" onclick="removeCard('${id}')">×</button>`
-        : "";
-      card.innerHTML = `${removeButton}<h3>${cardData.name}</h3><p>${cardData.word}</p><time>${cardData.time}</time>`;
-      grid.appendChild(card);
-    }
-  });
 
   window.removeCard = function (id) {
     if (!isAdmin) return;
@@ -243,11 +245,12 @@
       isAdmin = true;
       alert("Je bent nu ingelogd als admin.");
       closeModal();
-      onValue(cardsRef, () => {});
+      onValue(cardsRef, renderCards); // opnieuw tekenen met verwijderknoppen
     } else {
       alert("Verkeerd wachtwoord.");
     }
   };
 </script>
+
 </body>
 </html>
