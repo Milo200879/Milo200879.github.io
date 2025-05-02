@@ -199,33 +199,40 @@
     }
   });
 
-  onValue(cardsRef, snapshot => {
-    const grid = document.getElementById("cardGrid");
-    grid.innerHTML = "";
-    const data = snapshot.val();
-    for (let id in data) {
-      const card = data[id];
+  
+onValue(cardsRef, snapshot => {
+  const grid = document.getElementById("cardGrid");
+  grid.innerHTML = "";
+  const data = snapshot.val();
+  for (let id in data) {
+    const card = data[id];
     if (!card.approved && !isAdmin) continue;
-      const div = document.createElement("div");
-      div.className = "card";
-      div.style.backgroundColor = card.color;
-      const remove = isAdmin ? `<button class="remove-btn" onclick="removeCard('${id}')">×</button>` : "";
-      const emailInfo = isAdmin && card.user ? `<div style='font-size:13px;color:#222;'>📧 ${card.user}</div>` : "";
-      div.innerHTML = `
-        <h3>${card.name}</h3>
-        <p>${card.word}</p>
-        <time>${card.time}</time>
-        <div class='like-section'>
-      <button onclick="likeCard('${id}', ${card.likes || 0})">❤️</button> ${card.likes || 0}
-    </div>
-    ${isAdmin ? `<button class="remove-btn" onclick="removeCard('\${id}')">×</button>` : ""}
-    ${(isAdmin && card.user) ? `<div style='font-size:13px;color:#222;'>📧 \${card.user}</div>` : ""}
-        ${emailInfo}
-        ${remove}
-      `;
-      grid.appendChild(div);
+
+    const div = document.createElement("div");
+    div.className = "card";
+    div.style.backgroundColor = card.color;
+    let html = `
+      <h3>${card.name}</h3>
+      <p>${card.word}</p>
+      <time>${card.time}</time>
+      <div class='like-section'>
+        <button onclick="likeCard('${id}', ${card.likes || 0})">❤️</button> ${card.likes || 0}
+      </div>
+    `;
+
+    if (isAdmin) {
+      html += `<div style='font-size:13px; color:#222;'>📧 ${card.user}</div>`;
+      html += `<button class="remove-btn" onclick="removeCard('${id}')">×</button>`;
+      if (!card.approved) {
+        html += `<button class="remove-btn" style="right: 40px; background: green;" onclick="approveCard('${id}')">✔</button>`;
+      }
     }
-  });
+
+    div.innerHTML = html;
+    grid.appendChild(div);
+  }
+});
+
 
   window.addCard = function () {
     let name = document.getElementById("name").value;
