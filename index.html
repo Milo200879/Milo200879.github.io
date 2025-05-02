@@ -1,180 +1,124 @@
-
 <!DOCTYPE html>
 <html lang="nl">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Woordenmuur</title>
-  <style>
-    body {
-      font-family: 'Segoe UI', sans-serif;
-      background: #fefcf8;
-      margin: 0;
-      padding: 20px;
-      text-align: center;
+  <meta charset="UTF-8">
+  <title>Welk woord zeggen de leerkrachten?</title>
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+    import { getDatabase, ref, push, onValue, remove, update } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+    import { getAuth, signInWithEmailAndPassword, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyBvJuRQMqjfc-Kwl2bCAxA5dejCh_ZFQQw",
+      authDomain: "padlet-bea3c.firebaseapp.com",
+      databaseURL: "https://padlet-bea3c-default-rtdb.europe-west1.firebasedatabase.app/",
+      projectId: "padlet-bea3c",
+      storageBucket: "padlet-bea3c.appspot.com",
+      messagingSenderId: "873457849726",
+      appId: "1:873457849726:web:158348903d437928d9cf2f"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+    const auth = getAuth(app);
+    const cardsRef = ref(db, "cards");
+
+    let isAdmin = false;
+    let latestSnapshot = null;
+
+    onAuthStateChanged(auth, (user) => {
+      if (user) {
+        const key = user.email.replaceAll(".", "%2E");
+        const adminCheckRef = ref(db, `admins/${key}`);
+        onValue(adminCheckRef, (snap) => {
+          if (snap.exists()) {
+            isAdmin = true;
+            alert("Je bent ingelogd als admin.");
+            if (latestSnapshot) renderCards(latestSnapshot);
+          } else {
+            alert("Geen adminrechten.");
+          }
+        });
+      }
+    });
+
+    function renderCards(snapshot) {
+      latestSnapshot = snapshot;
+      const grid = document.getElementById("cardGrid");
+      grid.innerHTML = "";
+      const data = snapshot.val();
+      for (let id in data) {
+        const card = data[id];
+        const div = document.createElement("div");
+        div.className = "card";
+        div.style.backgroundColor = card.color;
+        const remove = isAdmin ? `<button onclick="removeCard('${id}')">🗑️</button>` : "";
+        const likes = card.likes || 0;
+        div.innerHTML = `
+          <h3>${card.name}</h3>
+          <p>${card.word}</p>
+          <time>${card.time}</time>
+          <div>
+            <button onclick="likeCard('${id}', ${likes})">❤️</button> ${likes}
+            ${remove}
+          </div>
+        `;
+        grid.appendChild(div);
+      }
     }
 
-    h1 {
-      margin-top: 20px;
-    }
+    onValue(cardsRef, renderCards);
 
-    .logo {
-      max-width: 200px;
-      margin: 0 auto;
-    }
+    window.addCard = function () {
+      const name = document.getElementById("name").value;
+      const word = document.getElementById("word").value;
+      const color = document.getElementById("color").value;
+      const now = new Date().toLocaleString();
+      push(cardsRef, { name, word, color, time: now, likes: 0 });
+    };
 
-    .form {
-      margin: 20px auto;
-      max-width: 500px;
-    }
+    window.removeCard = function (id) {
+      if (!isAdmin) return;
+      remove(ref(db, `cards/${id}`));
+    };
 
-    input, select, button {
-      width: 100%;
-      padding: 12px;
-      margin: 6px 0;
-      border: 1px solid #ccc;
-      border-radius: 6px;
-      font-size: 16px;
-    }
+    window.likeCard = function (id, currentLikes) {
+      update(ref(db, `cards/${id}`), { likes: currentLikes + 1 });
+    };
 
-    button {
-      background-color: coral;
-      color: white;
-      border: none;
-      cursor: pointer;
-    }
-
-    .admin-button, .darkmode-button {
-      position: fixed;
-      top: 20px;
-      padding: 10px 16px;
-      border-radius: 6px;
-      z-index: 10;
-    }
-
-    .admin-button {
-      right: 20px;
-      background: #333;
-      color: white;
-    }
-
-    .darkmode-button {
-      left: 20px;
-      background: coral;
-      color: white;
-    }
-
-    .grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-      gap: 16px;
-      margin-top: 30px;
-    }
-
-    .card {
-      padding: 16px;
-      border-radius: 12px;
-      color: #000;
-      text-align: left;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-      position: relative;
-    }
-
-    .card h3 {
-      margin-top: 0;
-    }
-
-    .like-section {
-      margin-top: 10px;
-      display: flex;
-      align-items: center;
-      gap: 5px;
-    }
-
-    .remove-btn {
-      position: absolute;
-      top: 8px;
-      right: 8px;
-      background: #e74c3c;
-      color: white;
-      border: none;
-      border-radius: 50%;
-      cursor: pointer;
-      width: 24px;
-      height: 24px;
-    }
-  </style>
+    window.login = function () {
+      const email = document.getElementById("email").value;
+      const password = document.getElementById("password").value;
+      signInWithEmailAndPassword(auth, email, password)
+        .then(() => alert("Ingelogd!"))
+        .catch(err => alert("Fout: " + err.message));
+    };
+  </script>
 </head>
 <body>
-  <button class="darkmode-button">🌓</button>
-  <button class="admin-button">🔐 Admin</button>
+  <h1>Welk woord zeggen de leerkrachten?</h1>
 
-  <img src="logo.png" class="logo" alt="Logo" />
-  <h1>Woordenmuur</h1>
+  <input id="name" placeholder="Naam"><br>
+  <input id="word" placeholder="Woord"><br>
+  <select id="color">
+    <option value="rgba(255, 0, 0, 0.7)">🔴 Rood</option>
+    <option value="rgba(0, 0, 255, 0.7)">🔵 Blauw</option>
+    <option value="rgba(0, 128, 0, 0.7)">🟢 Groen</option>
+    <option value="rgba(255, 255, 0, 0.7)">🟡 Geel</option>
+    <option value="rgba(255, 165, 0, 0.7)">🟠 Oranje</option>
+    <option value="rgba(128, 0, 128, 0.7)">🟣 Paars</option>
+  </select><br>
+  <button onclick="addCard()">Verstuur</button>
 
-  <div class="form">
-    <input type="text" placeholder="Jouw naam" />
-    <input type="text" placeholder="Woord of bericht" />
-    <select>
-      <option>🔴 Rood</option>
-      <option>🔵 Blauw</option>
-      <option>🟢 Groen</option>
-      <option>🟡 Geel</option>
-      <option>🟠 Oranje</option>
-      <option>🟣 Paars</option>
-    </select>
-    <button>Verstuur</button>
-  </div>
+  <hr>
 
-  <div class="grid">
-    <div class="card" style="background-color: #ff4d4d;">
-      <h3>Leerling 1</h3>
-      <p>Woord 1</p>
-      <time>2/5/2025 18:02</time>
-      <div class="like-section">
-        ❤️ <span>0</span>
-      </div>
-    </div>
-    <div class="card" style="background-color: #4d79ff;">
-      <h3>Leerling 2</h3>
-      <p>Woord 2</p>
-      <time>2/5/2025 18:02</time>
-      <div class="like-section">
-        ❤️ <span>11</span>
-      </div>
-    </div>
-    <div class="card" style="background-color: #2ecc71;">
-      <h3>Leerling 3</h3>
-      <p>Woord 3</p>
-      <time>2/5/2025 18:03</time>
-      <div class="like-section">
-        ❤️ <span>8</span>
-      </div>
-    </div>
-    <div class="card" style="background-color: #ffff66;">
-      <h3>Leerling 4</h3>
-      <p>Woord 4</p>
-      <time>2/5/2025 18:03</time>
-      <div class="like-section">
-        ❤️ <span>0</span>
-      </div>
-    </div>
-    <div class="card" style="background-color: #ffb347;">
-      <h3>Leerling 5</h3>
-      <p>Woord 5</p>
-      <time>2/5/2025 18:03</time>
-      <div class="like-section">
-        ❤️ <span>0</span>
-      </div>
-    </div>
-    <div class="card" style="background-color: #a64ca6;">
-      <h3>Leerling 6</h3>
-      <p>Woord 6</p>
-      <time>2/5/2025 18:03</time>
-      <div class="like-section">
-        ❤️ <span>0</span>
-      </div>
-    </div>
-  </div>
+  <h2>Admin login</h2>
+  <input id="email" type="email" placeholder="E-mailadres"><br>
+  <input id="password" type="password" placeholder="Wachtwoord"><br>
+  <button onclick="login()">Inloggen</button>
+
+  <hr>
+
+  <div id="cardGrid"></div>
 </body>
 </html>
