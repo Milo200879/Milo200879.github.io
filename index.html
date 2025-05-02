@@ -214,6 +214,10 @@ onValue(cardsRef, snapshot => {
     if (!card.approved && !isAdmin) continue;
 
     const div = document.createElement("div");
+    div.id = 'card-' + id;
+    div.dataset.name = card.name;
+    div.dataset.word = card.word;
+    div.dataset.color = card.color;
     div.className = "card";
     div.style.backgroundColor = card.color;
     let html = `
@@ -229,6 +233,7 @@ onValue(cardsRef, snapshot => {
       html += `<div style='font-size:13px; color:#222;'>📧 ${card.user}</div>`;
       html += `<button class="remove-btn" onclick="removeCard('${id}')">×</button>`;
       if (!card.approved) {
+        html += `<button class="remove-btn" style="right: 70px; background: #555;" onclick="updateCard('${id}')">✏️</button>`;
         html += `<button class="remove-btn" style="right: 40px; background: green;" onclick="approveCard('${id}')">✔</button>`;
       }
     }
@@ -304,5 +309,24 @@ onValue(cardsRef, snapshot => {
       const db = getDatabase();
       update(ref(db, 'cards/' + id), { approved: true });
     });
+  };
+</script>
+
+<script>
+  window.updateCard = function(id) {
+    const cardDiv = document.getElementById('card-' + id);
+    const newName = prompt("Nieuwe naam:", cardDiv.dataset.name);
+    const newWord = prompt("Nieuw woord:", cardDiv.dataset.word);
+    const newColor = prompt("Nieuwe kleur (RGBA):", cardDiv.dataset.color);
+    if (newName && newWord && newColor) {
+      import('https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js').then(({ getDatabase, ref, update }) => {
+        const db = getDatabase();
+        update(ref(db, 'cards/' + id), {
+          name: newName,
+          word: newWord,
+          color: newColor
+        });
+      });
+    }
   };
 </script>
