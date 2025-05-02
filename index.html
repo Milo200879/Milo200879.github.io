@@ -1,109 +1,105 @@
-
 <!DOCTYPE html>
 <html lang="nl">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta charset="UTF-8">
   <title>Welk woord zeggen de leerkrachten?</title>
-  <style>
-    body {
-      font-family: 'Segoe UI', sans-serif;
-      background: #fefbf6;
-      margin: 0;
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+    import { getDatabase, ref, push, onValue, remove, update } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+    import { getAuth, signInWithEmailAndPassword, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyBvJuRQMqjfc-Kwl2bCAxA5dejCh_ZFQQw",
+      authDomain: "padlet-bea3c.firebaseapp.com",
+      projectId: "padlet-bea3c",
+      storageBucket: "padlet-bea3c.appspot.com",
+      messagingSenderId: "873457849726",
+      appId: "1:873457849726:web:158348903d437928d9cf2f",
+      databaseURL: "https://padlet-bea3c-default-rtdb.europe-west1.firebasedatabase.app/"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+    const auth = getAuth(app);
+    const cardsRef = ref(db, "cards");
+
+    let isAdmin = false;
+    let latestSnapshot = null;
+
+    onAuthStateChanged(auth, (user) => {
+      if (user) {
+        const key = user.email.replaceAll(".", "%2E");
+        const adminCheckRef = ref(db, `admins/${key}`);
+        onValue(adminCheckRef, (snap) => {
+          if (snap.exists()) {
+            isAdmin = true;
+            alert("Je bent ingelogd als admin.");
+            if (latestSnapshot) renderCards(latestSnapshot);
+          } else {
+            alert("Geen adminrechten.");
+          }
+        });
+      }
+    });
+
+    function renderCards(snapshot) {
+      latestSnapshot = snapshot;
+      const grid = document.getElementById("cardGrid");
+      grid.innerHTML = "";
+      const data = snapshot.val();
+      for (let id in data) {
+        const card = data[id];
+        const div = document.createElement("div");
+        div.className = "card";
+        div.style.backgroundColor = card.color;
+        const remove = isAdmin ? `<button onclick="removeCard('${id}')">🗑️</button>` : "";
+        const likes = card.likes || 0;
+        div.innerHTML = \`
+          <h3>\${card.name}</h3>
+          <p>\${card.word}</p>
+          <time>\${card.time}</time>
+          <div>
+            <button onclick="likeCard('\${id}', \${likes})">❤️</button> \${likes}
+            \${remove}
+          </div>
+        \`;
+        grid.appendChild(div);
+      }
     }
-    .top-bar {
-      background: #2c2c2c;
-      color: white;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 12px 20px;
-    }
-    .top-bar button {
-      background: coral;
-      border: none;
-      color: white;
-      padding: 10px 16px;
-      border-radius: 8px;
-      font-size: 16px;
-      cursor: pointer;
-    }
-    .logo {
-      display: block;
-      margin: 40px auto 10px auto;
-      max-width: 180px;
-    }
-    h1 {
-      text-align: center;
-      margin: 10px auto 20px auto;
-      font-size: 24px;
-      color: #222;
-    }
-    .form-container {
-      max-width: 400px;
-      margin: 0 auto 30px auto;
-      padding: 0 20px;
-      text-align: center;
-    }
-    input, select, button {
-      width: 100%;
-      padding: 12px;
-      margin: 8px 0;
-      font-size: 16px;
-      border-radius: 6px;
-      border: 1px solid #ccc;
-    }
-    .submit-btn {
-      background: coral;
-      color: white;
-      border: none;
-      font-weight: bold;
-    }
-    .grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-      gap: 20px;
-      padding: 0 20px 40px 20px;
-      max-width: 1200px;
-      margin: 0 auto;
-    }
-    .card {
-      background: white;
-      border-radius: 12px;
-      padding: 16px;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-    }
-    .modal {
-      display: none;
-      position: fixed;
-      z-index: 1001;
-      left: 0; top: 0;
-      width: 100%; height: 100%;
-      background: rgba(0,0,0,0.5);
-    }
-    .modal-content {
-      background: white;
-      padding: 20px;
-      border-radius: 10px;
-      max-width: 360px;
-      margin: 15% auto;
-      text-align: center;
-    }
-  </style>
+
+    onValue(cardsRef, renderCards);
+
+    window.addCard = function () {
+      const name = document.getElementById("name").value;
+      const word = document.getElementById("word").value;
+      const color = document.getElementById("color").value;
+      const now = new Date().toLocaleString();
+      const user = auth.currentUser?.email || 'onbekend';
+    push(cardsRef, { name, word, color, time: now, likes: 0, user });
+    };
+
+    window.removeCard = function (id) {
+      if (!isAdmin) return;
+      remove(ref(db, `cards/${id}`));
+    };
+
+    window.likeCard = function (id, currentLikes) {
+      update(ref(db, `cards/${id}`), { likes: currentLikes + 1 });
+    };
+
+    window.login = function () {
+      const email = document.getElementById("email").value;
+      const password = document.getElementById("password").value;
+      signInWithEmailAndPassword(auth, email, password)
+        .then(() => alert("Ingelogd!"))
+        .catch(err => alert("Fout: " + err.message));
+    };
+  </script>
 </head>
 <body>
-
-<div class="top-bar">
-  <button onclick="toggleDarkMode()">🌗</button>
-  <button onclick="openModal()">🔐 Aanmelden</button>
-</div>
-
-<img src="logo.png" alt="Leerlingenraad" class="logo" />
-<h1>Welk woord zeggen de leerkrachten?</h1>
-
-<div class="form-container" id="inputForm" style="display: none;">
-  <input type="text" placeholder="Naam" id="name" />
-  <input type="text" placeholder="Woord" id="word" />
+  <h1>Welk woord zeggen de leerkrachten?</h1>
+  <input id="name" placeholder="Naam"><br>
+  <input id="word" placeholder="Woord"><br>
   <select id="color">
     <option value="rgba(255, 0, 0, 0.7)">🔴 Rood</option>
     <option value="rgba(0, 0, 255, 0.7)">🔵 Blauw</option>
@@ -111,123 +107,18 @@
     <option value="rgba(255, 255, 0, 0.7)">🟡 Geel</option>
     <option value="rgba(255, 165, 0, 0.7)">🟠 Oranje</option>
     <option value="rgba(128, 0, 128, 0.7)">🟣 Paars</option>
-  </select>
-  <button class="submit-btn" onclick="addCard()">Verstuur</button>
-  <button onclick="logout()" id="logoutBtn" style="display:none;">🚪 Uitloggen</button>
-</div>
+  </select><br>
+  <button onclick="addCard()">Verstuur</button>
 
-<div class="grid" id="cardGrid"></div>
+  <hr>
 
-<div class="modal" id="loginModal">
-  <div class="modal-content">
-    <h2>Log in of registreer</h2>
-    <input id="email" type="email" placeholder="E-mailadres" />
-    <input id="password" type="password" placeholder="Wachtwoord" />
-    <button onclick="login()">Inloggen</button>
-    <button onclick="signup()">Account aanmaken</button>
-  </div>
-</div>
+  <h2>Admin login</h2>
+  <input id="email" type="email" placeholder="E-mailadres"><br>
+  <input id="password" type="password" placeholder="Wachtwoord"><br>
+  <button onclick="login()">Inloggen</button>
 
-<script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-  import { getDatabase, ref, push, onValue } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
-  import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+  <hr>
 
-  const firebaseConfig = {
-    apiKey: "AIzaSyBvJuRQMqjfc-Kwl2bCAxA5dejCh_ZFQQw",
-    authDomain: "padlet-bea3c.firebaseapp.com",
-    databaseURL: "https://padlet-bea3c-default-rtdb.europe-west1.firebasedatabase.app",
-    projectId: "padlet-bea3c",
-    storageBucket: "padlet-bea3c.appspot.com",
-    messagingSenderId: "873457849726",
-    appId: "1:873457849726:web:158348903d437928d9cf2f"
-  };
-
-  const app = initializeApp(firebaseConfig);
-  const db = getDatabase(app);
-  const auth = getAuth(app);
-  const cardsRef = ref(db, "cards");
-
-  let isAdmin = false;
-
-  onAuthStateChanged(auth, user => {
-    const form = document.getElementById("inputForm");
-    const logoutBtn = document.getElementById("logoutBtn");
-    const grid = document.getElementById("cardGrid");
-    if (user) {
-      form.style.display = "block";
-      grid.style.display = "grid";
-      logoutBtn.style.display = "inline-block";
-      closeModal();
-    } else {
-      form.style.display = "none";
-      grid.style.display = "none";
-      logoutBtn.style.display = "none";
-      openModal();
-    }
-  });
-
-  window.login = function () {
-    const email = document.getElementById("email").value;
-    const pw = document.getElementById("password").value;
-    signInWithEmailAndPassword(auth, email, pw)
-      .then(() => alert("Ingelogd!"))
-      .catch(e => alert("Fout: " + e.message));
-  };
-
-  window.signup = function () {
-    const email = document.getElementById("email").value;
-    const pw = document.getElementById("password").value;
-    createUserWithEmailAndPassword(auth, email, pw)
-      .then(() => alert("Account aangemaakt! Je bent ingelogd."))
-      .catch(e => alert("Registratiefout: " + e.message));
-  };
-
-  window.logout = function () {
-    signOut(auth).then(() => alert("Uitgelogd."));
-  };
-
-  window.addCard = function () {
-    const name = document.getElementById("name").value;
-    const word = document.getElementById("word").value;
-    const color = document.getElementById("color").value;
-    const now = new Date().toLocaleString();
-    push(cardsRef, { name, word, color, time: now, likes: 0 });
-  };
-
-  window.openModal = function () {
-    document.getElementById("loginModal").style.display = "block";
-  };
-
-  window.closeModal = function () {
-    document.getElementById("loginModal").style.display = "none";
-  };
-
-  onValue(cardsRef, snapshot => {
-    const grid = document.getElementById("cardGrid");
-    grid.innerHTML = "";
-    const data = snapshot.val();
-    for (let id in data) {
-      const card = data[id];
-      const div = document.createElement("div");
-      div.className = "card";
-      div.style.backgroundColor = card.color;
-      div.innerHTML = `
-        <h3>${card.name}</h3>
-        <p>${card.word}</p>
-        <time>${card.time}</time>
-        <div>❤️ ${card.likes || 0}</div>
-      `;
-      grid.appendChild(div);
-    }
-  });
-</script>
-
-<script>
-function toggleDarkMode() {
-  document.body.classList.toggle("dark-mode");
-}
-</script>
-
+  <div id="cardGrid"></div>
 </body>
 </html>
