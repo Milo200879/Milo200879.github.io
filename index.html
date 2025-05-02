@@ -1,171 +1,8 @@
-
 <!DOCTYPE html>
 <html lang="nl">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta charset="UTF-8">
   <title>Welk woord zeggen de leerkrachten?</title>
-  <style>
-    body {
-      font-family: 'Segoe UI', sans-serif;
-      background: #fefcf8;
-      margin: 0;
-      padding: 20px;
-      text-align: center;
-    }
-
-    .top-bar {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 10px 20px;
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      background: #2c2c2c;
-      z-index: 1000;
-    }
-
-    .top-bar button {
-      padding: 10px 20px;
-      border: none;
-      border-radius: 8px;
-      font-size: 16px;
-      cursor: pointer;
-      color: white;
-    }
-
-    .dark { background-color: coral; }
-    .admin { background-color: #333; }
-
-    .logo {
-      margin-top: 70px;
-      max-width: 200px;
-    }
-
-    .form {
-      margin: 20px auto;
-      max-width: 500px;
-    }
-
-    input, select, button {
-      width: 100%;
-      padding: 12px;
-      margin: 6px 0;
-      border: 1px solid #ccc;
-      border-radius: 6px;
-      font-size: 16px;
-    }
-
-    button {
-      background-color: coral;
-      color: white;
-      border: none;
-      cursor: pointer;
-    }
-
-    .grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-      gap: 16px;
-      margin-top: 30px;
-    }
-
-    .card {
-      padding: 16px;
-      border-radius: 12px;
-      color: #000;
-      text-align: left;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-      position: relative;
-    }
-
-    .like-section {
-      margin-top: 10px;
-      display: flex;
-      align-items: center;
-      gap: 5px;
-    }
-
-    .remove-btn {
-      position: absolute;
-      top: 8px;
-      right: 8px;
-      background: #e74c3c;
-      color: white;
-      border: none;
-      border-radius: 50%;
-      cursor: pointer;
-      width: 24px;
-      height: 24px;
-    }
-
-    /* Modal styles */
-    .modal {
-      display: none;
-      position: fixed;
-      z-index: 2001;
-      left: 0; top: 0;
-      width: 100%; height: 100%;
-      background-color: rgba(0,0,0,0.5);
-    }
-
-    .modal-content {
-      background: white;
-      margin: 10% auto;
-      padding: 20px;
-      width: 90%;
-      max-width: 400px;
-      border-radius: 10px;
-      text-align: center;
-    }
-
-    .close {
-      position: absolute;
-      top: 10px;
-      right: 20px;
-      font-size: 20px;
-      cursor: pointer;
-    }
-  </style>
-</head>
-<body>
-  <div class="top-bar">
-    <button class="dark" onclick="toggleDarkMode()">🌓</button>
-    <button class="admin" onclick="openModal()">🔐 Admin</button>
-  </div>
-
-  <img src="logo.png" class="logo" alt="Logo Leerlingenraad" />
-  <h1>Welk woord zeggen de leerkrachten?</h1>
-
-  <div class="form">
-    <input id="name" placeholder="Naam">
-    <input id="word" placeholder="Woord">
-    <select id="color">
-      <option value="rgba(255, 0, 0, 0.7)">🔴 Rood</option>
-      <option value="rgba(0, 0, 255, 0.7)">🔵 Blauw</option>
-      <option value="rgba(0, 128, 0, 0.7)">🟢 Groen</option>
-      <option value="rgba(255, 255, 0, 0.7)">🟡 Geel</option>
-      <option value="rgba(255, 165, 0, 0.7)">🟠 Oranje</option>
-      <option value="rgba(128, 0, 128, 0.7)">🟣 Paars</option>
-    </select>
-    <button onclick="addCard()">Verstuur</button>
-  </div>
-
-  <div class="grid" id="cardGrid"></div>
-
-  <!-- Modal -->
-  <div id="loginModal" class="modal">
-    <div class="modal-content">
-      <span class="close" onclick="closeModal()">&times;</span>
-      <h2>Admin login</h2>
-      <input id="email" type="email" placeholder="E-mailadres">
-      <input id="password" type="password" placeholder="Wachtwoord">
-      <button onclick="login()">Inloggen</button>
-    </div>
-  </div>
-
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
     import { getDatabase, ref, push, onValue, remove, update } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
@@ -174,11 +11,11 @@
     const firebaseConfig = {
       apiKey: "AIzaSyBvJuRQMqjfc-Kwl2bCAxA5dejCh_ZFQQw",
       authDomain: "padlet-bea3c.firebaseapp.com",
-      databaseURL: "https://padlet-bea3c-default-rtdb.europe-west1.firebasedatabase.app/",
       projectId: "padlet-bea3c",
       storageBucket: "padlet-bea3c.appspot.com",
       messagingSenderId: "873457849726",
-      appId: "1:873457849726:web:158348903d437928d9cf2f"
+      appId: "1:873457849726:web:158348903d437928d9cf2f",
+      databaseURL: "https://padlet-bea3c-default-rtdb.europe-west1.firebasedatabase.app/"
     };
 
     const app = initializeApp(firebaseConfig);
@@ -196,7 +33,6 @@
         onValue(adminCheckRef, (snap) => {
           if (snap.exists()) {
             isAdmin = true;
-            closeModal();
             alert("Je bent ingelogd als admin.");
             if (latestSnapshot) renderCards(latestSnapshot);
           } else {
@@ -216,15 +52,17 @@
         const div = document.createElement("div");
         div.className = "card";
         div.style.backgroundColor = card.color;
-        const remove = isAdmin ? `<button class="remove-btn" onclick="removeCard('${id}')">×</button>` : "";
+        const remove = isAdmin ? `<button onclick="removeCard('${id}')">🗑️</button>` : "";
         const likes = card.likes || 0;
-        div.innerHTML = `
-          <h3>${card.name}</h3>
-          <p>${card.word}</p>
-          <time>${card.time}</time>
-          <div class="like-section">❤️ ${likes}</div>
-          ${remove}
-        `;
+        div.innerHTML = \`
+          <h3>\${card.name}</h3>
+          <p>\${card.word}</p>
+          <time>\${card.time}</time>
+          <div>
+            <button onclick="likeCard('\${id}', \${likes})">❤️</button> \${likes}
+            \${remove}
+          </div>
+        \`;
         grid.appendChild(div);
       }
     }
@@ -244,6 +82,10 @@
       remove(ref(db, `cards/${id}`));
     };
 
+    window.likeCard = function (id, currentLikes) {
+      update(ref(db, `cards/${id}`), { likes: currentLikes + 1 });
+    };
+
     window.login = function () {
       const email = document.getElementById("email").value;
       const password = document.getElementById("password").value;
@@ -251,18 +93,31 @@
         .then(() => alert("Ingelogd!"))
         .catch(err => alert("Fout: " + err.message));
     };
-
-    window.openModal = function () {
-      document.getElementById("loginModal").style.display = "block";
-    };
-
-    window.closeModal = function () {
-      document.getElementById("loginModal").style.display = "none";
-    };
-
-    window.toggleDarkMode = function () {
-      document.body.classList.toggle('dark-mode');
-    };
   </script>
+</head>
+<body>
+  <h1>Welk woord zeggen de leerkrachten?</h1>
+  <input id="name" placeholder="Naam"><br>
+  <input id="word" placeholder="Woord"><br>
+  <select id="color">
+    <option value="rgba(255, 0, 0, 0.7)">🔴 Rood</option>
+    <option value="rgba(0, 0, 255, 0.7)">🔵 Blauw</option>
+    <option value="rgba(0, 128, 0, 0.7)">🟢 Groen</option>
+    <option value="rgba(255, 255, 0, 0.7)">🟡 Geel</option>
+    <option value="rgba(255, 165, 0, 0.7)">🟠 Oranje</option>
+    <option value="rgba(128, 0, 128, 0.7)">🟣 Paars</option>
+  </select><br>
+  <button onclick="addCard()">Verstuur</button>
+
+  <hr>
+
+  <h2>Admin login</h2>
+  <input id="email" type="email" placeholder="E-mailadres"><br>
+  <input id="password" type="password" placeholder="Wachtwoord"><br>
+  <button onclick="login()">Inloggen</button>
+
+  <hr>
+
+  <div id="cardGrid"></div>
 </body>
 </html>
