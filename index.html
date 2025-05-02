@@ -171,6 +171,16 @@
       logoutBtn.style.display = "inline-block";
       closeModal();
       if (user.email === "thomasdewever@dvmhumaniora.be") {
+      const input = document.getElementById("name");
+      if (input && !input.value) {
+        const emailName = user.email.split("@")[0];
+        const prefill = emailName
+          .replace(/([a-z])([A-Z])/g, "$1 $2")
+          .replace(/([a-z])([a-z]+)/gi, w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase())
+          .replace(/(\d+)/g, "")
+          .replace(/([a-z]{2,})([a-z]{2,})/, (_, a, b) => a.charAt(0).toUpperCase() + a.slice(1) + " " + b.charAt(0).toUpperCase() + b.slice(1));
+        input.value = prefill;
+      }
         isAdmin = true;
       }
     } else {
