@@ -174,11 +174,7 @@
       const input = document.getElementById("name");
       if (input && !input.value) {
         const emailName = user.email.split("@")[0];
-        const prefill = emailName
-          .replace(/([a-z])([A-Z])/g, "$1 $2")
-          .replace(/([a-z])([a-z]+)/gi, w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase())
-          .replace(/(\d+)/g, "")
-          .replace(/([a-z]{2,})([a-z]{2,})/, (_, a, b) => a.charAt(0).toUpperCase() + a.slice(1) + " " + b.charAt(0).toUpperCase() + b.slice(1));
+        const prefill = emailName.charAt(0).toUpperCase() + emailName.slice(1).toLowerCase();
         input.value = prefill;
       }
         isAdmin = true;
@@ -221,11 +217,7 @@
     let name = document.getElementById("name").value;
     if (!name && auth.currentUser?.email) {
       const emailName = auth.currentUser.email.split("@")[0];
-      name = emailName
-        .replace(/([a-z])([A-Z])/g, "$1 $2")
-        .replace(/([a-z])([a-z]+)/gi, w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase())
-        .replace(/(\d+)/g, "")
-        .replace(/([a-z]{2,})([a-z]{2,})/, (_, a, b) => a.charAt(0).toUpperCase() + a.slice(1) + " " + b.charAt(0).toUpperCase() + b.slice(1));
+      name = emailName.charAt(0).toUpperCase() + emailName.slice(1).toLowerCase();
     }
     const word = document.getElementById("word").value;
     const color = document.getElementById("color").value;
