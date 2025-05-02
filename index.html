@@ -6,6 +6,11 @@
   <title>Welk woord zeggen de leerkrachten?</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <style>
+    .logo {
+      display: block;
+      margin: 20px auto 10px auto;
+      width: 180px;
+    }
     body {
       font-family: 'Segoe UI', sans-serif;
       background: #fefbf6;
@@ -90,13 +95,7 @@
       max-width: 360px;
       margin: 15% auto;
       text-align: center;
-	}
-	.logo {
-	  display: block;
-      margin: 20px auto 10px auto;
-      width: 520px;
-	}
-
+    }
   </style>
 </head>
 <body>
@@ -106,7 +105,7 @@
   <button onclick="openModal()">🔐 Admin</button>
 </div>
 
-<img src="logo_leerlingenraad_scaled.png" alt="Leerlingenraad Logo" class="logo">
+<img src="logo.png" alt="Leerlingenraad Logo" class="logo">
 <h1 style="text-align:center;">Welk woord zeggen de leerkrachten?</h1>
 
 <div class="form-container" id="inputForm" style="display:none;">
@@ -161,6 +160,11 @@
     const form = document.getElementById("inputForm");
     const logoutBtn = document.getElementById("logoutBtn");
     if (user) {
+      if (!user.email.endsWith("@dvmhumaniora.be")) {
+        alert("Alleen e-mails van @dvmhumaniora.be zijn toegestaan.");
+        logout();
+        return;
+      }
       form.style.display = "block";
       logoutBtn.style.display = "inline-block";
       closeModal();
