@@ -208,7 +208,15 @@
   });
 
   window.addCard = function () {
-    const name = document.getElementById("name").value;
+    let name = document.getElementById("name").value;
+    if (!name && auth.currentUser?.email) {
+      const emailName = auth.currentUser.email.split("@")[0];
+      name = emailName
+        .replace(/([a-z])([A-Z])/g, "$1 $2")
+        .replace(/([a-z])([a-z]+)/gi, w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase())
+        .replace(/(\d+)/g, "")
+        .replace(/([a-z]{2,})([a-z]{2,})/, (_, a, b) => a.charAt(0).toUpperCase() + a.slice(1) + " " + b.charAt(0).toUpperCase() + b.slice(1));
+    }
     const word = document.getElementById("word").value;
     const color = document.getElementById("color").value;
     const now = new Date().toLocaleString();
