@@ -190,7 +190,7 @@
       div.className = "card";
       div.style.backgroundColor = card.color;
       const remove = isAdmin ? `<button class="remove-btn" onclick="removeCard('${id}')">×</button>` : "";
-      const emailInfo = isAdmin && card.user ? `<div style='font-size:14px;font-weight:bold;color:#000;'>📧 ${card.user}</div>` : "";
+      const emailInfo = isAdmin && card.user ? `<div style='font-size:13px;color:#222;'>📧 ${card.user}</div>` : "";
       div.innerHTML = `
         <h3>${card.name}</h3>
         <p>${card.word}</p>
@@ -199,7 +199,7 @@
       <button onclick="likeCard('${id}', ${card.likes || 0})">❤️</button> ${card.likes || 0}
     </div>
     ${isAdmin ? `<button class="remove-btn" onclick="removeCard('\${id}')">×</button>` : ""}
-    ${(isAdmin && card.user) ? `<div style='font-size:14px;font-weight:bold;color:#000;'>📧 \${card.user}</div>` : ""}
+    ${(isAdmin && card.user) ? `<div style='font-size:13px;color:#222;'>📧 \${card.user}</div>` : ""}
         ${emailInfo}
         ${remove}
       `;
