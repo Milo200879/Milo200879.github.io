@@ -2,14 +2,15 @@
 <!DOCTYPE html>
 <html lang="nl">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta charset="UTF-8">
   <title>Welk woord zeggen de leerkrachten?</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <style>
     body {
       font-family: 'Segoe UI', sans-serif;
       background: #fefbf6;
       margin: 0;
+      padding: 0;
     }
     .top-bar {
       background: #2c2c2c;
@@ -28,21 +29,9 @@
       font-size: 16px;
       cursor: pointer;
     }
-    .logo {
-      display: block;
-      margin: 40px auto 10px auto;
-      max-width: 180px;
-    }
-    h1 {
-      text-align: center;
-      margin: 10px auto 20px auto;
-      font-size: 24px;
-      color: #222;
-    }
     .form-container {
       max-width: 400px;
-      margin: 0 auto 30px auto;
-      padding: 0 20px;
+      margin: 20px auto;
       text-align: center;
     }
     input, select, button {
@@ -63,7 +52,7 @@
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
       gap: 20px;
-      padding: 0 20px 40px 20px;
+      padding: 20px;
       max-width: 1200px;
       margin: 0 auto;
     }
@@ -72,14 +61,27 @@
       border-radius: 12px;
       padding: 16px;
       box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+      position: relative;
+    }
+    .remove-btn {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      background: crimson;
+      color: white;
+      border: none;
+      border-radius: 50%;
+      width: 24px;
+      height: 24px;
+      cursor: pointer;
     }
     .modal {
       display: none;
       position: fixed;
-      z-index: 1001;
-      left: 0; top: 0;
+      top: 0; left: 0;
       width: 100%; height: 100%;
       background: rgba(0,0,0,0.5);
+      z-index: 999;
     }
     .modal-content {
       background: white;
@@ -95,22 +97,21 @@
 
 <div class="top-bar">
   <button onclick="toggleDarkMode()">🌗</button>
-  <button onclick="openModal()">🔐 Aanmelden</button>
+  <button onclick="openModal()">🔐 Admin</button>
 </div>
 
-<img src="logo.png" alt="Leerlingenraad" class="logo" />
-<h1>Welk woord zeggen de leerkrachten?</h1>
+<h1 style="text-align:center;">Welk woord zeggen de leerkrachten?</h1>
 
-<div class="form-container" id="inputForm" style="display: none;">
-  <input type="text" placeholder="Naam" id="name" />
-  <input type="text" placeholder="Woord" id="word" />
+<div class="form-container" id="inputForm" style="display:none;">
+  <input id="name" placeholder="Naam">
+  <input id="word" placeholder="Woord">
   <select id="color">
-    <option value="rgba(255, 0, 0, 0.7)">🔴 Rood</option>
-    <option value="rgba(0, 0, 255, 0.7)">🔵 Blauw</option>
-    <option value="rgba(0, 128, 0, 0.7)">🟢 Groen</option>
-    <option value="rgba(255, 255, 0, 0.7)">🟡 Geel</option>
-    <option value="rgba(255, 165, 0, 0.7)">🟠 Oranje</option>
-    <option value="rgba(128, 0, 128, 0.7)">🟣 Paars</option>
+    <option value="rgba(255,0,0,0.7)">🔴 Rood</option>
+    <option value="rgba(0,0,255,0.7)">🔵 Blauw</option>
+    <option value="rgba(0,128,0,0.7)">🟢 Groen</option>
+    <option value="rgba(255,255,0,0.7)">🟡 Geel</option>
+    <option value="rgba(255,165,0,0.7)">🟠 Oranje</option>
+    <option value="rgba(128,0,128,0.7)">🟣 Paars</option>
   </select>
   <button class="submit-btn" onclick="addCard()">Verstuur</button>
   <button onclick="logout()" id="logoutBtn" style="display:none;">🚪 Uitloggen</button>
@@ -120,7 +121,7 @@
 
 <div class="modal" id="loginModal">
   <div class="modal-content">
-    <h2>Log in of registreer</h2>
+    <h2>Login of registreer</h2>
     <input id="email" type="email" placeholder="E-mailadres" />
     <input id="password" type="password" placeholder="Wachtwoord" />
     <button onclick="login()">Inloggen</button>
@@ -130,13 +131,13 @@
 
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-  import { getDatabase, ref, push, onValue } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+  import { getDatabase, ref, push, onValue, update, remove } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
   import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 
   const firebaseConfig = {
     apiKey: "AIzaSyBvJuRQMqjfc-Kwl2bCAxA5dejCh_ZFQQw",
     authDomain: "padlet-bea3c.firebaseapp.com",
-    databaseURL: "https://padlet-bea3c-default-rtdb.europe-west1.firebasedatabase.app",
+    databaseURL: "https://padlet-bea3c-default-rtdb.europe-west1.firebasedatabase.app/",
     projectId: "padlet-bea3c",
     storageBucket: "padlet-bea3c.appspot.com",
     messagingSenderId: "873457849726",
@@ -147,61 +148,24 @@
   const db = getDatabase(app);
   const auth = getAuth(app);
   const cardsRef = ref(db, "cards");
-
   let isAdmin = false;
 
-  onAuthStateChanged(auth, user => {
+  onAuthStateChanged(auth, (user) => {
     const form = document.getElementById("inputForm");
     const logoutBtn = document.getElementById("logoutBtn");
-    const grid = document.getElementById("cardGrid");
     if (user) {
       form.style.display = "block";
-      grid.style.display = "grid";
       logoutBtn.style.display = "inline-block";
       closeModal();
+      if (user.email === "thomasdewever07@gmail.com") {
+        isAdmin = true;
+      }
     } else {
       form.style.display = "none";
-      grid.style.display = "none";
       logoutBtn.style.display = "none";
       openModal();
     }
   });
-
-  window.login = function () {
-    const email = document.getElementById("email").value;
-    const pw = document.getElementById("password").value;
-    signInWithEmailAndPassword(auth, email, pw)
-      .then(() => alert("Ingelogd!"))
-      .catch(e => alert("Fout: " + e.message));
-  };
-
-  window.signup = function () {
-    const email = document.getElementById("email").value;
-    const pw = document.getElementById("password").value;
-    createUserWithEmailAndPassword(auth, email, pw)
-      .then(() => alert("Account aangemaakt! Je bent ingelogd."))
-      .catch(e => alert("Registratiefout: " + e.message));
-  };
-
-  window.logout = function () {
-    signOut(auth).then(() => alert("Uitgelogd."));
-  };
-
-  window.addCard = function () {
-    const name = document.getElementById("name").value;
-    const word = document.getElementById("word").value;
-    const color = document.getElementById("color").value;
-    const now = new Date().toLocaleString();
-    push(cardsRef, { name, word, color, time: now, likes: 0 });
-  };
-
-  window.openModal = function () {
-    document.getElementById("loginModal").style.display = "block";
-  };
-
-  window.closeModal = function () {
-    document.getElementById("loginModal").style.display = "none";
-  };
 
   onValue(cardsRef, snapshot => {
     const grid = document.getElementById("cardGrid");
@@ -212,44 +176,60 @@
       const div = document.createElement("div");
       div.className = "card";
       div.style.backgroundColor = card.color;
+      const remove = isAdmin ? `<button class="remove-btn" onclick="removeCard('${id}')">×</button>` : "";
+      const emailInfo = isAdmin && card.user ? `<div style='font-size:12px;color:#666;'>📧 ${card.user}</div>` : "";
       div.innerHTML = `
         <h3>${card.name}</h3>
         <p>${card.word}</p>
         <time>${card.time}</time>
-        <div class='like-section'>
-        <button onclick="likeCard('${id}', ${card.likes || 0})">❤️</button> ${card.likes || 0}
-      </div>
-      ${isAdmin ? `<button class='remove-btn' onclick="removeCard('${id}')">×</button>` : ''}
-      ${(isAdmin && card.user) ? `<div style='font-size:12px;color:#666;margin-top:8px;'>📧 ${card.user}</div>` : ''}
+        <div>❤️ ${card.likes || 0}</div>
+        ${emailInfo}
+        ${remove}
       `;
       grid.appendChild(div);
     }
   });
-</script>
 
-<script>
-function toggleDarkMode() {
-  document.body.classList.toggle("dark-mode");
-}
-</script>
+  window.addCard = function () {
+    const name = document.getElementById("name").value;
+    const word = document.getElementById("word").value;
+    const color = document.getElementById("color").value;
+    const now = new Date().toLocaleString();
+    const user = auth.currentUser?.email || "onbekend";
+    push(cardsRef, { name, word, color, time: now, likes: 0, user });
+  };
 
+  window.removeCard = function (id) {
+    remove(ref(db, `cards/${id}`));
+  };
+
+  window.login = function () {
+    signInWithEmailAndPassword(auth, email.value, password.value)
+      .then(() => alert("Ingelogd!"))
+      .catch(e => alert("Fout: " + e.message));
+  };
+
+  window.signup = function () {
+    createUserWithEmailAndPassword(auth, email.value, password.value)
+      .then(() => alert("Account aangemaakt!"))
+      .catch(e => alert("Fout: " + e.message));
+  };
+
+  window.logout = function () {
+    signOut(auth);
+  };
+
+  window.openModal = function () {
+    document.getElementById("loginModal").style.display = "block";
+  };
+
+  window.closeModal = function () {
+    document.getElementById("loginModal").style.display = "none";
+  };
+
+  window.toggleDarkMode = function () {
+    document.body.classList.toggle("dark-mode");
+  };
+</script>
 </body>
 </html>
-
-<script>
-  window.likeCard = function(id, currentLikes) {
-    import('https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js').then(({ getDatabase, ref, update }) => {
-      const db = getDatabase();
-      update(ref(db, 'cards/' + id), { likes: currentLikes + 1 });
-    });
-  };
-
-  window.removeCard = function(id) {
-    import('https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js').then(({ getDatabase, ref, remove }) => {
-      const db = getDatabase();
-      if (confirm('Weet je zeker dat je dit kaartje wilt verwijderen?')) {
-        remove(ref(db, 'cards/' + id));
-      }
-    });
-  };
-</script>
