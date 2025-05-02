@@ -198,6 +198,8 @@
         <div class='like-section'>
       <button onclick="likeCard('${id}', ${card.likes || 0})">❤️</button> ${card.likes || 0}
     </div>
+    ${isAdmin ? `<button class="remove-btn" onclick="removeCard('\${id}')">×</button>` : ""}
+    ${(isAdmin && card.user) ? `<div style='font-size:12px;color:#666;'>📧 \${card.user}</div>` : ""}
         ${emailInfo}
         ${remove}
       `;
