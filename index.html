@@ -91,12 +91,28 @@
       z-index: 999;
     }
     .modal-content {
+      position: relative;
+
       background: white;
       padding: 20px;
       border-radius: 10px;
       max-width: 360px;
       margin: 15% auto;
       text-align: center;
+    }
+  
+    .close-btn {
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      background: #ccc;
+      border: none;
+      border-radius: 50%;
+      width: 28px;
+      height: 28px;
+      font-size: 18px;
+      cursor: pointer;
+      line-height: 1;
     }
   </style>
 </head>
@@ -140,6 +156,7 @@
 
 <div class="modal" id="loginModal" style="display:none;">
   <div class="modal-content">
+    <button class="close-btn" onclick="closeModal()">×</button>
     <h2>Login of registreer</h2>
     <p style="font-size: 14px; color: #333; margin-top: -10px;">
       Je moet verplicht inloggen met jouw DvM-mailadres,<br>
@@ -201,10 +218,10 @@
       }
         isAdmin = true;
       }
-    } else {
+    }
+    else {
       form.style.display = "none";
       logoutBtn.style.display = "none";
-      openModal();
     }
   });
 
