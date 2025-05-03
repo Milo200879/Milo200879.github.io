@@ -169,13 +169,6 @@
   const db = getDatabase(app);
   const auth = getAuth(app);
   const cardsRef = ref(db, "cards");
-    // Function to load cards based on approval and admin status
-    function loadCards() {
-      }
-
-    // Initial load for unauthenticated visitors
-    loadCards();
-
   let isAdmin = false;
 
   onAuthStateChanged(auth, (user) => {
@@ -214,7 +207,63 @@
 
   
 
-window.addCard = function () {
+onValue(cardsRef, snapshot => {
+  const grid = document.getElementById("cardGrid");
+  grid.innerHTML = "";
+  const data = snapshot.val();
+  for (let id in data) {
+    const card = data[id];
+    if (!card.approved && !isAdmin) continue;
+
+    const div = document.createElement("div");
+    div.className = "card";
+    div.style.backgroundColor = card.color || "#fff";
+    div.style.borderRadius = "12px";
+    div.style.boxShadow = "0 2px 6px rgba(0,0,0,0.1)";
+    div.style.padding = "16px";
+    div.style.position = "relative";
+    div.style.whiteSpace = "pre-wrap";
+
+    const name = document.createElement("div");
+    name.innerHTML = `<strong>${card.name}</strong>`;
+    name.style.fontSize = "15px";
+    name.style.marginBottom = "2px";
+    div.appendChild(name);
+
+    const time = document.createElement("div");
+    time.innerText = card.time || "";
+    time.style.fontSize = "12px";
+    time.style.color = "#555";
+    time.style.marginBottom = "8px";
+    div.appendChild(time);
+
+    const title = document.createElement("div");
+    title.innerHTML = `<strong>${card.word}</strong>`;
+    title.style.fontSize = "16px";
+    title.style.marginBottom = "8px";
+    div.appendChild(title);
+
+    const likes = document.createElement("div");
+    likes.className = "like-section";
+    likes.innerHTML = `<button onclick="likeCard('${id}', ${card.likes || 0})">❤️</button> ${card.likes || 0}`;
+    div.appendChild(likes);
+
+    if (isAdmin) {
+      div.innerHTML += `<div style='font-size:13px; color:#222;'>📧 ${card.user}</div>`;
+      div.innerHTML += `<button class="remove-btn" onclick="removeCard('${id}')">×</button>`;
+      if (!card.approved) {
+        div.innerHTML += `<button class="remove-btn" style="right: 40px; background: green;" onclick="approveCard('${id}')">✔</button>`;
+        div.innerHTML += `<button class="remove-btn" style="right: 70px; background: #555;" onclick="updateCard('${id}')">✏️</button>`;
+      }
+    }
+
+    grid.appendChild(div);
+  }
+});
+
+
+
+  window.addCard = function () {
     let name = document.getElementById("name").value;
     if (!name && auth.currentUser?.email) {
       const emailName = auth.currentUser.email.split("@")[0];
