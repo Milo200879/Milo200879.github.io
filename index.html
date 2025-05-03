@@ -91,6 +91,8 @@
       z-index: 999;
     }
     .modal-content {
+      position: relative;
+
       background: white;
       padding: 20px;
       border-radius: 10px;
@@ -187,6 +189,41 @@
   const db = getDatabase(app);
   const auth = getAuth(app);
   const cardsRef = ref(db, "cards");
+
+  function loadCards() {
+    onValue(cardsRef, snapshot => {
+      const grid = document.getElementById("cardGrid");
+      grid.innerHTML = "";
+      const data = snapshot.val() || {};
+      for (let id in data) {
+        const card = data[id];
+        if (!card.approved && !isAdmin) continue;
+        const div = document.createElement("div");
+        div.className = "card";
+        div.style.backgroundColor = card.color;
+        div.style.borderRadius = "12px";
+        div.style.boxShadow = "0 2px 6px rgba(0,0,0,0.1)";
+        div.style.padding = "16px";
+        div.style.position = "relative";
+        div.style.whiteSpace = "pre-wrap";
+        div.innerHTML = `
+          <div style="font-size:15px; margin-bottom:2px;"><strong>${card.name}</strong></div>
+          <div style="font-size:12px; color:#555; margin-bottom:8px;">${card.time}</div>
+          <div style="font-size:16px; margin-bottom:8px;"><strong>${card.word}</strong></div>
+          <div class="like-section"><button onclick="likeCard('${id}', ${card.likes || 0})">❤️</button> ${card.likes || 0}</div>
+        `;
+        if (isAdmin) {
+          div.innerHTML += `<div style='font-size:13px; color:#222;'>📧 ${card.user}</div>`;
+          div.innerHTML += `<button class="remove-btn" onclick="removeCard('${id}')">×</button>`;
+          if (!card.approved) {
+            div.innerHTML += `<button class="remove-btn" style="right: 40px; background: green;" onclick="approveCard('${id}')">✔</button>`;
+          }
+        }
+        grid.appendChild(div);
+      }
+    });
+  }
+
   let isAdmin = false;
 
   onAuthStateChanged(auth, (user) => {
@@ -199,6 +236,7 @@
         return;
       }
       form.style.display = "block";
+      loadCards();
       logoutBtn.style.display = "inline-block";
       closeModal();
       const input = document.getElementById("name");
@@ -216,7 +254,9 @@
       }
         isAdmin = true;
       }
-    } else {
+    
+      loadCards();}
+    else {
       form.style.display = "none";
       logoutBtn.style.display = "none";
     }
@@ -224,6 +264,7 @@
 
   
 
+/*
 onValue(cardsRef, snapshot => {
   const grid = document.getElementById("cardGrid");
   grid.innerHTML = "";
@@ -331,7 +372,9 @@ onValue(cardsRef, snapshot => {
 </html>
 
 <script>
-  window.likeCard = function(id, currentLikes) {
+  window.likeCard
+*/
+window.likeCard = function(id, currentLikes) {
     import('https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js').then(({ getDatabase, ref, update }) => {
       const db = getDatabase();
       update(ref(db, 'cards/' + id), { likes: currentLikes + 1 });
