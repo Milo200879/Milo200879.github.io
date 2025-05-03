@@ -91,8 +91,6 @@
       z-index: 999;
     }
     .modal-content {
-      position: relative;
-
       background: white;
       padding: 20px;
       border-radius: 10px;
@@ -100,34 +98,17 @@
       margin: 15% auto;
       text-align: center;
     }
-  
-    .close-btn {
-      position: absolute;
-      top: 8px;
-      right: 8px;
-      background: #ccc;
-      border: none;
-      border-radius: 50%;
-      width: 28px;
-      height: 28px;
-      font-size: 18px;
-      cursor: pointer;
-      line-height: 1;
-    }
   </style>
 </head>
 <body>
 
 <div class="top-bar">
   <button onclick="toggleDarkMode()">🌗</button>
-  <button onclick="openModal()">🔑 Login / Registreer</button>
+  <button onclick="openModal()">🔐 Admin</button>
 </div>
 
 <img src="logo.png" alt="Leerlingenraad Logo" class="logo">
 <h1 style="text-align:center;">Welk woord zeggen de leerkrachten?</h1>
-    <p style="text-align:center; font-size: 16px; color: #333; margin-top: -10px;">
-      Om iets in te sturen moet je inloggen of registreren.
-    </p>
 
 <div class="form-container" id="inputForm" style="display:none;">
   <input id="name" readonly placeholder="Naam">
@@ -154,9 +135,8 @@
 
 <div class="grid" id="cardGrid"></div>
 
-<div class="modal" id="loginModal" style="display:none;">
+<div class="modal" id="loginModal">
   <div class="modal-content">
-    <button class="close-btn" onclick="closeModal()">×</button>
     <h2>Login of registreer</h2>
     <p style="font-size: 14px; color: #333; margin-top: -10px;">
       Je moet verplicht inloggen met jouw DvM-mailadres,<br>
@@ -189,40 +169,12 @@
   const db = getDatabase(app);
   const auth = getAuth(app);
   const cardsRef = ref(db, "cards");
-
-  function loadCards() {
-    onValue(cardsRef, snapshot => {
-      const grid = document.getElementById("cardGrid");
-      grid.innerHTML = "";
-      const data = snapshot.val() || {};
-      for (let id in data) {
-        const card = data[id];
-        if (!card.approved && !isAdmin) continue;
-        const div = document.createElement("div");
-        div.className = "card";
-        div.style.backgroundColor = card.color;
-        div.style.borderRadius = "12px";
-        div.style.boxShadow = "0 2px 6px rgba(0,0,0,0.1)";
-        div.style.padding = "16px";
-        div.style.position = "relative";
-        div.style.whiteSpace = "pre-wrap";
-        div.innerHTML = `
-          <div style="font-size:15px; margin-bottom:2px;"><strong>${card.name}</strong></div>
-          <div style="font-size:12px; color:#555; margin-bottom:8px;">${card.time}</div>
-          <div style="font-size:16px; margin-bottom:8px;"><strong>${card.word}</strong></div>
-          <div class="like-section"><button onclick="likeCard('${id}', ${card.likes || 0})">❤️</button> ${card.likes || 0}</div>
-        `;
-        if (isAdmin) {
-          div.innerHTML += `<div style='font-size:13px; color:#222;'>📧 ${card.user}</div>`;
-          div.innerHTML += `<button class="remove-btn" onclick="removeCard('${id}')">×</button>`;
-          if (!card.approved) {
-            div.innerHTML += `<button class="remove-btn" style="right: 40px; background: green;" onclick="approveCard('${id}')">✔</button>`;
-          }
-        }
-        grid.appendChild(div);
+    // Function to load cards based on approval and admin status
+    function loadCards() {
       }
-    });
-  }
+
+    // Initial load for unauthenticated visitors
+    loadCards();
 
   let isAdmin = false;
 
@@ -236,7 +188,6 @@
         return;
       }
       form.style.display = "block";
-      loadCards();
       logoutBtn.style.display = "inline-block";
       closeModal();
       const input = document.getElementById("name");
@@ -254,74 +205,16 @@
       }
         isAdmin = true;
       }
-    
-      loadCards();}
-    else {
+    } else {
       form.style.display = "none";
       logoutBtn.style.display = "none";
+      openModal();
     }
   });
 
   
 
-/*
-onValue(cardsRef, snapshot => {
-  const grid = document.getElementById("cardGrid");
-  grid.innerHTML = "";
-  const data = snapshot.val();
-  for (let id in data) {
-    const card = data[id];
-    if (!card.approved) continue;
-
-    const div = document.createElement("div");
-    div.className = "card";
-    div.style.backgroundColor = card.color || "#fff";
-    div.style.borderRadius = "12px";
-    div.style.boxShadow = "0 2px 6px rgba(0,0,0,0.1)";
-    div.style.padding = "16px";
-    div.style.position = "relative";
-    div.style.whiteSpace = "pre-wrap";
-
-    const name = document.createElement("div");
-    name.innerHTML = `<strong>${card.name}</strong>`;
-    name.style.fontSize = "15px";
-    name.style.marginBottom = "2px";
-    div.appendChild(name);
-
-    const time = document.createElement("div");
-    time.innerText = card.time || "";
-    time.style.fontSize = "12px";
-    time.style.color = "#555";
-    time.style.marginBottom = "8px";
-    div.appendChild(time);
-
-    const title = document.createElement("div");
-    title.innerHTML = `<strong>${card.word}</strong>`;
-    title.style.fontSize = "16px";
-    title.style.marginBottom = "8px";
-    div.appendChild(title);
-
-    const likes = document.createElement("div");
-    likes.className = "like-section";
-    likes.innerHTML = `<button onclick="likeCard('${id}', ${card.likes || 0})">❤️</button> ${card.likes || 0}`;
-    div.appendChild(likes);
-
-    if (isAdmin) {
-      div.innerHTML += `<div style='font-size:13px; color:#222;'>📧 ${card.user}</div>`;
-      div.innerHTML += `<button class="remove-btn" onclick="removeCard('${id}')">×</button>`;
-      if (!card.approved) {
-        div.innerHTML += `<button class="remove-btn" style="right: 40px; background: green;" onclick="approveCard('${id}')">✔</button>`;
-        div.innerHTML += `<button class="remove-btn" style="right: 70px; background: #555;" onclick="updateCard('${id}')">✏️</button>`;
-      }
-    }
-
-    grid.appendChild(div);
-  }
-});
-
-
-
-  window.addCard = function () {
+window.addCard = function () {
     let name = document.getElementById("name").value;
     if (!name && auth.currentUser?.email) {
       const emailName = auth.currentUser.email.split("@")[0];
@@ -372,9 +265,7 @@ onValue(cardsRef, snapshot => {
 </html>
 
 <script>
-  window.likeCard
-*/
-window.likeCard = function(id, currentLikes) {
+  window.likeCard = function(id, currentLikes) {
     import('https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js').then(({ getDatabase, ref, update }) => {
       const db = getDatabase();
       update(ref(db, 'cards/' + id), { likes: currentLikes + 1 });
