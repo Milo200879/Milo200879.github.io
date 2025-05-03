@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="nl">
 <head>
@@ -26,13 +25,11 @@
       padding: 12px 20px;
     }
     .top-bar button {
-      padding: 6px 12px;
-      font-size: 14px;
       background: coral;
       border: none;
       color: white;
-      padding: 10px 16px;
       border-radius: 8px;
+      padding: 10px 16px;
       font-size: 16px;
       cursor: pointer;
     }
@@ -69,6 +66,7 @@
       padding: 16px;
       box-shadow: 0 4px 10px rgba(0,0,0,0.1);
       position: relative;
+      white-space: pre-wrap;
     }
     .remove-btn {
       position: absolute;
@@ -95,257 +93,181 @@
       padding: 20px;
       border-radius: 10px;
       max-width: 360px;
-      margin: 15% auto;
+      margin: 10% auto;
       text-align: center;
+      position: relative;
+    }
+    /* Sluitknop in modal */
+    .close-btn {
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      background: #ccc;
+      border: none;
+      border-radius: 50%;
+      width: 28px;
+      height: 28px;
+      font-size: 18px;
+      cursor: pointer;
+      line-height: 1;
     }
   </style>
 </head>
 <body>
 
-<div class="top-bar">
-  <button onclick="toggleDarkMode()">🌗</button>
-  <button onclick="openModal()">🔐 Admin</button>
-</div>
-
-<img src="logo.png" alt="Leerlingenraad Logo" class="logo">
-<h1 style="text-align:center;">Welk woord zeggen de leerkrachten?</h1>
-
-<div class="form-container" id="inputForm" style="display:none;">
-  <input id="name" readonly placeholder="Naam">
-  <input id="word" placeholder="Woord">
-  <select id="color">
-    <option value="rgba(255,0,0,0.7)">🔴 Rood</option>
-    <option value="rgba(0,0,255,0.7)">🔵 Blauw</option>
-    <option value="rgba(0,128,0,0.7)">🟢 Groen</option>
-    <option value="rgba(255,255,0,0.7)">🟡 Geel</option>
-    <option value="rgba(255,165,0,0.7)">🟠 Oranje</option>
-    <option value="rgba(128,0,128,0.7)">🟣 Paars</option>
-  
-<option value="rgba(135, 206, 250, 0.7)">🔵 Lichtblauw</option>
-<option value="rgba(139, 0, 0, 0.7)">🔴 Donkerrood</option>
-<option value="rgba(144, 238, 144, 0.7)">🟢 Lichtgroen</option>
-<option value="rgba(128, 128, 128, 0.7)">⚫ Grijs</option>
-<option value="rgba(255, 105, 180, 0.7)">🟣 Roze</option>
-<option value="rgba(64, 224, 208, 0.7)">🔵 Turquoise</option>
-
-</select>
-  <button class="submit-btn" onclick="addCard()">Verstuur</button>
-  <button onclick="logout()" id="logoutBtn" style="display:none;">🚪 Uitloggen</button>
-</div>
-
-<div class="grid" id="cardGrid"></div>
-
-<div class="modal" id="loginModal">
-  <div class="modal-content">
-    <h2>Login of registreer</h2>
-    <p style="font-size: 14px; color: #333; margin-top: -10px;">
-      Je moet verplicht inloggen met jouw DvM-mailadres,<br>
-      je mag een wachtwoord kiezen waarmee je in de toekomst ook nog woorden kan invoeren.<br>
-      <strong style="color: red;">!!! Dit is en moet NIET het wachtwoord van jouw DvM-mailadres zijn !!!</strong>
-    </p>
-    <input id="email" type="email" placeholder="E-mailadres" />
-    <input id="password" type="password" placeholder="Wachtwoord" />
-    <button onclick="login()">Inloggen</button>
-    <button onclick="signup()">Account aanmaken</button>
+  <div class="top-bar">
+    <button onclick="toggleDarkMode()">🌗</button>
+    <button onclick="openModal()">🔑 Login / Registreer</button>
   </div>
-</div>
 
-<script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-  import { getDatabase, ref, push, onValue, update, remove } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
-  import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+  <img src="logo.png" alt="Leerlingenraad Logo" class="logo">
+  <h1 style="text-align:center;">Welk woord zeggen de leerkrachten?</h1>
+  <p style="text-align:center; font-size: 16px; color: #333; margin-top: -10px;">
+    Om iets in te sturen moet je inloggen of registreren.
+  </p>
 
-  const firebaseConfig = {
-    apiKey: "AIzaSyBvJuRQMqjfc-Kwl2bCAxA5dejCh_ZFQQw",
-    authDomain: "padlet-bea3c.firebaseapp.com",
-    databaseURL: "https://padlet-bea3c-default-rtdb.europe-west1.firebasedatabase.app/",
-    projectId: "padlet-bea3c",
-    storageBucket: "padlet-bea3c.appspot.com",
-    messagingSenderId: "873457849726",
-    appId: "1:873457849726:web:158348903d437928d9cf2f"
-  };
+  <div class="form-container" id="inputForm" style="display:none;">
+    <input id="name" readonly placeholder="Naam">
+    <input id="word" placeholder="Woord">
+    <select id="color">
+      <option value="rgba(255,0,0,0.7)">🔴 Rood</option>
+      <option value="rgba(0,0,255,0.7)">🔵 Blauw</option>
+      <option value="rgba(0,128,0,0.7)">🟢 Groen</option>
+      <option value="rgba(255,255,0,0.7)">🟡 Geel</option>
+      <option value="rgba(255,165,0,0.7)">🟠 Oranje</option>
+      <option value="rgba(128,0,128,0.7)">🟣 Paars</option>
+      <option value="rgba(135,206,250,0.7)">🔵 Lichtblauw</option>
+      <option value="rgba(139,0,0,0.7)">🔴 Donkerrood</option>
+      <option value="rgba(144,238,144,0.7)">🟢 Lichtgroen</option>
+      <option value="rgba(128,128,128,0.7)">⚫ Grijs</option>
+      <option value="rgba(255,105,180,0.7)">🟣 Roze</option>
+      <option value="rgba(64,224,208,0.7)">🔵 Turquoise</option>
+    </select>
+    <button class="submit-btn" onclick="addCard()">Verstuur</button>
+    <button onclick="logout()" id="logoutBtn" style="display:none;">🚪 Uitloggen</button>
+  </div>
 
-  const app = initializeApp(firebaseConfig);
-  const db = getDatabase(app);
-  const auth = getAuth(app);
-  const cardsRef = ref(db, "cards");
-  let isAdmin = false;
+  <div class="grid" id="cardGrid"></div>
 
-  onAuthStateChanged(auth, (user) => {
-    const form = document.getElementById("inputForm");
-    const logoutBtn = document.getElementById("logoutBtn");
-    if (user) {
-      if (!user.email.endsWith("@dvmhumaniora.be")) {
-        alert("Alleen e-mails van @dvmhumaniora.be zijn toegestaan.");
-        logout();
-        return;
-      }
-      form.style.display = "block";
-      logoutBtn.style.display = "inline-block";
-      closeModal();
-      const input = document.getElementById("name");
-    if (input && !input.value) {
-      const emailName = user.email.split("@")[0];
-      const prefill = emailName.charAt(0).toUpperCase() + emailName.slice(1).toLowerCase();
-      input.value = prefill;
-    }
-    if (user.email === "thomasdewever@dvmhumaniora.be") {
-      const input = document.getElementById("name");
-      if (input && !input.value) {
-        const emailName = user.email.split("@")[0];
-        const prefill = emailName.charAt(0).toUpperCase() + emailName.slice(1).toLowerCase();
-        input.value = prefill;
-      }
-        isAdmin = true;
-      }
-    } else {
-      form.style.display = "none";
-      logoutBtn.style.display = "none";
-      openModal();
-    }
-  });
+  <div class="modal" id="loginModal">
+    <div class="modal-content">
+      <button class="close-btn" onclick="closeModal()">×</button>
+      <h2>Login of registreer</h2>
+      <p style="font-size: 14px; color: #333; margin-top: -10px;">
+        Je moet verplicht inloggen met jouw DvM-mailadres,<br>
+        je mag een wachtwoord kiezen waarmee je in de toekomst ook nog woorden kan invoeren.<br>
+        <strong style="color: red;">!!! Dit is en moet NIET het wachtwoord van jouw DvM-mailadres zijn !!!</strong>
+      </p>
+      <input id="email" type="email" placeholder="E-mailadres" />
+      <input id="password" type="password" placeholder="Wachtwoord" />
+      <button onclick="login()">Inloggen</button>
+      <button onclick="signup()">Account aanmaken</button>
+    </div>
+  </div>
 
-  
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+    import { getDatabase, ref, push, onValue, update, remove } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+    import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 
-onValue(cardsRef, snapshot => {
-  const grid = document.getElementById("cardGrid");
-  grid.innerHTML = "";
-  const data = snapshot.val();
-  for (let id in data) {
-    const card = data[id];
-    if (!card.approved && !isAdmin) continue;
+    const firebaseConfig = {
+      apiKey: "...",
+      authDomain: "padlet-bea3c.firebaseapp.com",
+      databaseURL: "https://padlet-bea3c-default-rtdb.europe-west1.firebasedatabase.app/",
+      projectId: "padlet-bea3c",
+      storageBucket: "padlet-bea3c.appspot.com",
+      messagingSenderId: "...",
+      appId: "..."
+    };
 
-    const div = document.createElement("div");
-    div.className = "card";
-    div.style.backgroundColor = card.color || "#fff";
-    div.style.borderRadius = "12px";
-    div.style.boxShadow = "0 2px 6px rgba(0,0,0,0.1)";
-    div.style.padding = "16px";
-    div.style.position = "relative";
-    div.style.whiteSpace = "pre-wrap";
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+    const auth = getAuth(app);
+    const cardsRef = ref(db, "cards");
+    let isAdmin = false;
 
-    const name = document.createElement("div");
-    name.innerHTML = `<strong>${card.name}</strong>`;
-    name.style.fontSize = "15px";
-    name.style.marginBottom = "2px";
-    div.appendChild(name);
-
-    const time = document.createElement("div");
-    time.innerText = card.time || "";
-    time.style.fontSize = "12px";
-    time.style.color = "#555";
-    time.style.marginBottom = "8px";
-    div.appendChild(time);
-
-    const title = document.createElement("div");
-    title.innerHTML = `<strong>${card.word}</strong>`;
-    title.style.fontSize = "16px";
-    title.style.marginBottom = "8px";
-    div.appendChild(title);
-
-    const likes = document.createElement("div");
-    likes.className = "like-section";
-    likes.innerHTML = `<button onclick="likeCard('${id}', ${card.likes || 0})">❤️</button> ${card.likes || 0}`;
-    div.appendChild(likes);
-
-    if (isAdmin) {
-      div.innerHTML += `<div style='font-size:13px; color:#222;'>📧 ${card.user}</div>`;
-      div.innerHTML += `<button class="remove-btn" onclick="removeCard('${id}')">×</button>`;
-      if (!card.approved) {
-        div.innerHTML += `<button class="remove-btn" style="right: 40px; background: green;" onclick="approveCard('${id}')">✔</button>`;
-        div.innerHTML += `<button class="remove-btn" style="right: 70px; background: #555;" onclick="updateCard('${id}')">✏️</button>`;
-      }
-    }
-
-    grid.appendChild(div);
-  }
-});
-
-
-
-  window.addCard = function () {
-    let name = document.getElementById("name").value;
-    if (!name && auth.currentUser?.email) {
-      const emailName = auth.currentUser.email.split("@")[0];
-      name = emailName.charAt(0).toUpperCase() + emailName.slice(1).toLowerCase();
-    }
-    const word = document.getElementById("word").value;
-    const color = document.getElementById("color").value;
-    const now = new Date().toLocaleString();
-    const user = auth.currentUser?.email || "onbekend";
-    push(cardsRef, { name, word, color, time: now, likes: 0, user, approved: false }).then(() => {
-      alert("✅ Je woord is succesvol verzonden!\nNa goedkeuring door een moderator verschijnt het op de muur.\n(Omwille van taalbescherming keuren we eerst elk bericht goed.)");
-    });
-  };
-
-  window.removeCard = function (id) {
-    remove(ref(db, `cards/${id}`));
-  };
-
-  window.login = function () {
-    signInWithEmailAndPassword(auth, email.value, password.value)
-      .then(() => alert("Ingelogd!"))
-      .catch(e => alert("Fout: " + e.message));
-  };
-
-  window.signup = function () {
-    createUserWithEmailAndPassword(auth, email.value, password.value)
-      .then(() => alert("Account aangemaakt!"))
-      .catch(e => alert("Fout: " + e.message));
-  };
-
-  window.logout = function () {
-    signOut(auth);
-  };
-
-  window.openModal = function () {
-    document.getElementById("loginModal").style.display = "block";
-  };
-
-  window.closeModal = function () {
-    document.getElementById("loginModal").style.display = "none";
-  };
-
-  window.toggleDarkMode = function () {
-    document.body.classList.toggle("dark-mode");
-  };
-</script>
-</body>
-</html>
-
-<script>
-  window.likeCard = function(id, currentLikes) {
-    import('https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js').then(({ getDatabase, ref, update }) => {
-      const db = getDatabase();
-      update(ref(db, 'cards/' + id), { likes: currentLikes + 1 });
-    });
-  };
-</script>
-
-<script>
-  window.approveCard = function(id) {
-    import('https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js').then(({ getDatabase, ref, update }) => {
-      const db = getDatabase();
-      update(ref(db, 'cards/' + id), { approved: true });
-    });
-  };
-</script>
-
-<script>
-  window.updateCard = function(id) {
-    const cardDiv = document.getElementById('card-' + id);
-    const newName = prompt("Nieuwe naam:", cardDiv.dataset.name);
-    const newWord = prompt("Nieuw woord:", cardDiv.dataset.word);
-    const newColor = prompt("Nieuwe kleur (RGBA):", cardDiv.dataset.color);
-    if (newName && newWord && newColor) {
-      import('https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js').then(({ getDatabase, ref, update }) => {
-        const db = getDatabase();
-        update(ref(db, 'cards/' + id), {
-          name: newName,
-          word: newWord,
-          color: newColor
-        });
+    // Kaarten laden – admins zien alles, bezoekers alleen goedgekeurde
+    function loadCards() {
+      onValue(cardsRef, snapshot => {
+        const grid = document.getElementById("cardGrid");
+        grid.innerHTML = "";
+        const data = snapshot.val() || {};
+        for (let id in data) {
+          const card = data[id];
+          if (!card.approved && !isAdmin) continue;
+          const div = document.createElement("div");
+          div.className = "card";
+          div.style.backgroundColor = card.color || "#fff";
+          div.innerHTML = `
+            <h3>${card.name}</h3>
+            <p style="margin: 6px 0;"><strong>${card.word}</strong></p>
+            <time style="font-size:12px;color:#555;">${card.time}</time>
+            <div class="like-section" style="margin-top:8px;">
+              <button onclick="likeCard('${id}', ${card.likes||0})">❤️</button> ${card.likes||0}
+            </div>
+            ${isAdmin
+              ? `<div style="font-size:13px;color:#222;margin-top:8px;">📧 ${card.user}</div>
+                 <button class="remove-btn" onclick="removeCard('${id}')">×</button>
+                 ${!card.approved ? `<button class="remove-btn" style="right:40px;background:green;" onclick="approveCard('${id}')">✔</button>` : ""}`
+              : ""}
+          `;
+          grid.appendChild(div);
+        }
       });
     }
-  };
-</script>
+
+    // Initial load voor bezoekers
+    loadCards();
+
+    // Auth-state listener
+    onAuthStateChanged(auth, user => {
+      const form = document.getElementById("inputForm");
+      const logoutBtn = document.getElementById("logoutBtn");
+      if (user) {
+        if (!user.email.endsWith("@dvmhumaniora.be")) {
+          alert("Alleen @dvmhumaniora.be e-mails zijn toegestaan.");
+          signOut(auth);
+          return;
+        }
+        // vul naam in
+        const input = document.getElementById("name");
+        if (input && !input.value) {
+          const emailName = user.email.split("@")[0];
+          input.value = emailName.charAt(0).toUpperCase() + emailName.slice(1).toLowerCase();
+        }
+        form.style.display = "block";
+        logoutBtn.style.display = "block";
+        closeModal();
+        if (user.email === "thomasdewever@dvmhumaniora.be") {
+          isAdmin = true;
+        }
+      } else {
+        form.style.display = "none";
+        logoutBtn.style.display = "none";      }
+      loadCards();  // kaarten altijd (her)laden na auth-check
+    });
+
+    window.addCard = () => {
+      const name = document.getElementById("name").value;
+      const word = document.getElementById("word").value;
+      const color = document.getElementById("color").value;
+      const now = new Date().toLocaleString();
+      const userEmail = auth.currentUser?.email || "onbekend";
+      push(cardsRef, { name, word, color, time: now, likes: 0, user: userEmail, approved: false })
+        .then(() => alert("✅ Je woord is succesvol verzonden!
+Na goedkeuring verschijnt het op de muur."));
+    };
+    window.removeCard = id => remove(ref(db, `cards/${id}`));
+    window.likeCard = (id, likes) => update(ref(db, `cards/${id}`), { likes: likes + 1 });
+    window.approveCard = id => update(ref(db, `cards/${id}`), { approved: true });
+
+    window.login = ()   => signInWithEmailAndPassword(auth, email.value, password.value).catch(e => alert("Fout: "+e.message));
+    window.signup = ()  => createUserWithEmailAndPassword(auth, email.value, password.value).catch(e => alert("Fout: "+e.message));
+    window.logout = ()  => signOut(auth);
+    window.openModal = () => document.getElementById("loginModal").style.display = "block";
+    window.closeModal = () => document.getElementById("loginModal").style.display = "none";
+    window.toggleDarkMode = () => document.body.classList.toggle("dark-mode");
+  </script>
+
+</body>
+</html>
