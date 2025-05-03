@@ -104,11 +104,14 @@
 
 <div class="top-bar">
   <button onclick="toggleDarkMode()">🌗</button>
-  <button onclick="openModal()">🔐 Admin</button>
+  <button onclick="openModal()">🔑 Login / Registreer</button>
 </div>
 
 <img src="logo.png" alt="Leerlingenraad Logo" class="logo">
 <h1 style="text-align:center;">Welk woord zeggen de leerkrachten?</h1>
+    <p style="text-align:center; font-size: 16px; color: #333; margin-top: -10px;">
+      Om iets in te sturen moet je inloggen of registreren.
+    </p>
 
 <div class="form-container" id="inputForm" style="display:none;">
   <input id="name" readonly placeholder="Naam">
@@ -135,7 +138,7 @@
 
 <div class="grid" id="cardGrid"></div>
 
-<div class="modal" id="loginModal">
+<div class="modal" id="loginModal" style="display:none;">
   <div class="modal-content">
     <h2>Login of registreer</h2>
     <p style="font-size: 14px; color: #333; margin-top: -10px;">
